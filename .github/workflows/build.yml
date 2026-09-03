@@ -25,22 +25,28 @@ jobs:
 
       - name: Fetch JUCE (if not cached)
         if: steps.cache-juce.outputs.cache-hit != 'true'
+        shell: bash
         run: |
           git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
 
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: '3.25.x'
-
       - name: Configure CMake
+        shell: bash
         run: |
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 
       - name: Build LoopStation & Unit Tests
+        shell: bash
         run: |
-          cmake --build build --config Release
+          cmake --build build --config Release --parallel
 
       - name: Run Automated Test Suite
+        shell: pwsh
         run: |
           .\build\LoopStation_Tests_artefacts\Release\LoopStation_Tests.exe
+
+      - name: Upload LoopStation Windows Executable
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: LoopStation-Windows-x64
+          path: build/LoopStation_artefacts/Release/LoopStation.exe
