@@ -37,12 +37,20 @@ jobs:
       - name: Build LoopStation & Unit Tests
         shell: bash
         run: |
-          cmake --build build --config Release --parallel
+          cmake --build build --config Release --parallel 2>&1 | tee build.log
+
+      - name: Show Compiler Error Details on Failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== BUILD FAILURE LOG SNIPPET ==="
+          grep -i -E -C 3 "error|fatal|fail" build.log | tail -n 120 || true
 
       - name: Run Automated Test Suite
         shell: pwsh
         run: |
           .\build\LoopStation_Tests_artefacts\Release\LoopStation_Tests.exe
+
 
       - name: Upload LoopStation Windows Executable
         uses: actions/upload-artifact@v4

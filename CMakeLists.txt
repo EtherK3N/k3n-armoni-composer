@@ -57,8 +57,6 @@ target_include_directories(LoopStation PRIVATE
 target_compile_definitions(LoopStation PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
-    JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:LoopStation,JUCE_PRODUCT_NAME>"
-    JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:LoopStation,JUCE_VERSION>"
 )
 
 target_link_libraries(LoopStation PRIVATE
@@ -67,13 +65,12 @@ target_link_libraries(LoopStation PRIVATE
     juce::juce_audio_formats
     juce::juce_gui_extra
     juce::juce_recommended_config_flags
-    juce::juce_recommended_lto_flags
-    juce::juce_recommended_warning_flags
 )
 
 if (WIN32)
-    target_link_libraries(LoopStation PRIVATE hid.lib setupapi.lib)
+    target_link_libraries(LoopStation PRIVATE hid.lib setupapi.lib user32.lib wininet.lib)
 endif()
+
 
 # ===========================================================================
 # Automated Unit Test Suite
@@ -110,9 +107,9 @@ target_link_libraries(LoopStation_Tests PRIVATE
     juce::juce_audio_formats
     juce::juce_gui_extra
     juce::juce_recommended_config_flags
-    juce::juce_recommended_warning_flags
 )
 
 if (WIN32)
-    target_link_libraries(LoopStation_Tests PRIVATE hid.lib setupapi.lib)
+    target_link_libraries(LoopStation_Tests PRIVATE hid.lib setupapi.lib user32.lib wininet.lib)
 endif()
+

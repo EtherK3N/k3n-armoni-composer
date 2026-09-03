@@ -18,8 +18,9 @@ class LoopStationApplication : public juce::JUCEApplication
 public:
     LoopStationApplication() = default;
 
-    const juce::String getApplicationName() override       { return JUCE_APPLICATION_NAME_STRING; }
-    const juce::String getApplicationVersion() override    { return JUCE_APPLICATION_VERSION_STRING; }
+    const juce::String getApplicationName() override       { return "K3N Armoni Composer"; }
+    const juce::String getApplicationVersion() override    { return "0.1.0"; }
+
     bool moreThanOneInstanceAllowed() override             { return true; }
 
     void initialise(const juce::String& commandLine) override
@@ -110,9 +111,8 @@ public:
                 hwnd = static_cast<HWND>(peer->getNativeHandle());
                 if (hwnd != nullptr)
                 {
-                    SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-                    originalWndProc = reinterpret_cast<WNDPROC>(
-                        SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(SubclassedWndProc)));
+                    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
+                    originalWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SubclassedWndProc);
 
                     mainComponent->setNativeWindowHandle(hwnd);
                 }
@@ -123,12 +123,13 @@ public:
         {
             if (hwnd != nullptr && originalWndProc != nullptr)
             {
-                SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(originalWndProc));
+                SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)originalWndProc);
                 SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
                 hwnd = nullptr;
                 originalWndProc = nullptr;
             }
         }
+
        #endif
 
         std::unique_ptr<MainComponent> mainComponent;
