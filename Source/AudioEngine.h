@@ -43,9 +43,12 @@ public:
     LoopTrack();
 
     void startRecording();
+    /** Stops recording without quantization. */
+    void stopRecordingAndStartLoop();
     /** Stops recording and snaps the loop length to the nearest bar boundary. */
     void stopRecordingAndStartLoop(const BpmQuantizer& quantizer, int beatsPerBar = 4);
     void clear();
+
 
     void setMuted(bool shouldBeMuted) { muted = shouldBeMuted; }
     bool isMuted() const { return muted; }

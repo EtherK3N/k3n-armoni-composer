@@ -13,6 +13,12 @@ void LoopTrack::startRecording()
     playbackPositionSamples = 0;
 }
 
+void LoopTrack::stopRecordingAndStartLoop()
+{
+    recording = false;
+    playbackPositionSamples = 0;
+}
+
 void LoopTrack::stopRecordingAndStartLoop(const BpmQuantizer& quantizer, int beatsPerBar)
 {
     recording = false;
@@ -21,6 +27,7 @@ void LoopTrack::stopRecordingAndStartLoop(const BpmQuantizer& quantizer, int bea
         loopLengthSamples = quantizer.snapLoopLengthToNearestBar(loopLengthSamples, beatsPerBar);
     playbackPositionSamples = 0;
 }
+
 
 
 void LoopTrack::clear()

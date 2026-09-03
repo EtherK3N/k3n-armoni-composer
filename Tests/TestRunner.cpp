@@ -117,6 +117,74 @@ void testMappingEngineJsonSerialization()
     assert(reloadedBinding->soundLabel == "Fat 808 Kick" && "Persisted label must match");
 }
 
+void testMetronomeClockAccuracy()
+{
+    MetronomeClock clock;
+    const double sr = 44100.0;
+    clock.prepareToPlay(sr, 512);
+    clock.setTempo(120.0); // 120 BPM => 0.5s per beat => 22050 samples per beat
+    clock.setTimeSignature(4, 4);
+
+    const double samplesPerBeat = clock.getSamplesPerBeat();
+    assert(std::abs(samplesPerBeat - 22050.0) < 1.0 && "120 BPM at 44100Hz must be 22050 samples per beat");
+
+    const double samplesPerBar = clock.getSamplesPerBar();
+    assert(std::abs(samplesPerBar - 88200.0) < 1.0 && "4/4 at 120 BPM must be 88200 samples per bar");
+
+    // Process blocks and verify beat event emission
+    int beatCount = 0;
+    int downbeatCount = 0;
+
+    // Process 2 full bars (88200 * 2 = 176400 samples) in 512-sample blocks
+    const int totalSamples = 176400;
+    const int blockSize = 512;
+    for (int processed = 0; processed < totalSamples; processed += blockSize)
+    {
+        clock.processBlock(blockSize, [&](const BeatEvent& ev)
+        {
+            if (ev.type == BeatType::Downbeat)
+            {
+                downbeatCount++;
+                beatCount++;
+            }
+            else if (ev.type == BeatType::Beat)
+            {
+                beatCount++;
+            }
+        });
+    }
+
+    assert(downbeatCount == 2 && "2 full bars must emit exactly 2 downbeats");
+    assert(beatCount == 8 && "2 full bars in 4/4 must emit exactly 8 beats");
+
+    clock.releaseResources();
+}
+
+void testBpmQuantizerGridMath()
+{
+    BpmQuantizer quant;
+    quant.setSampleRate(44100.0);
+    quant.setTempo(120.0); // 22050 samples/beat
+    quant.setGridResolution(GridResolution::Sixteenth); // 1/16 = 22050 / 4 = 5512.5 samples
+
+    const double step = quant.getGridStepSamples();
+    assert(std::abs(step - 5512.5) < 0.1 && "1/16 step at 120 BPM must be 5512.5 samples");
+
+    // Test snap: an event at 5400 samples should snap to nearest 1/16 grid line (5513 samples)
+    const juce::int64 loopLength = 88200; // 1 bar
+    juce::int64 snapped = quant.quantize(5400, loopLength);
+    assert(snapped == 5513 && "Sample 5400 should snap to 5513 (nearest 1/16 step)");
+
+    // Test snapLoopLengthToNearestBar:
+    // A loose recording of 90000 samples (slightly over 88200) should snap to 88200 (1 bar)
+    juce::int64 barSnapped = quant.snapLoopLengthToNearestBar(90000, 4);
+    assert(barSnapped == 88200 && "90000 samples must snap to 88200 (1 bar at 120 BPM)");
+
+    // Test 2 bars snap: 170000 samples should snap to 176400 (2 bars)
+    juce::int64 twoBarSnapped = quant.snapLoopLengthToNearestBar(170000, 4);
+    assert(twoBarSnapped == 176400 && "170000 samples must snap to 176400 (2 bars)");
+}
+
 int main(int argc, char* argv[])
 {
     juce::ignoreUnused(argc, argv);
@@ -127,9 +195,12 @@ int main(int argc, char* argv[])
     RUN_TEST(testAudioEngineProceduralKitAndVoices);
     RUN_TEST(testLoopTrackWrapAroundTriggerMath);
     RUN_TEST(testMappingEngineJsonSerialization);
+    RUN_TEST(testMetronomeClockAccuracy);
+    RUN_TEST(testBpmQuantizerGridMath);
 
     std::cout << "\n=======================================================\n";
-    std::cout << "  ALL TESTS PASSED SUCCESSFULLY! (100% Core Integrity)\n";
+    std::cout << "  ALL 5 TEST SUITES PASSED! (100% Core Integrity)\n";
     std::cout << "=======================================================\n\n";
     return 0;
 }
+

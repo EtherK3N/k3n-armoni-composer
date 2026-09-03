@@ -5,14 +5,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ---------------------------------------------------------------------------
-# Requires JUCE as submodule or installed package
-# Suggested: git submodule add https://github.com/juce-framework/JUCE.git JUCE
+# JUCE Resolution: Subdirectory -> Installed Package -> FetchContent Auto-Download
 # ---------------------------------------------------------------------------
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
     add_subdirectory(JUCE)
 else()
-    find_package(JUCE CONFIG REQUIRED)
+    find_package(JUCE CONFIG QUIET)
+    if (NOT JUCE_FOUND)
+        message(STATUS "JUCE not found locally. Automatically downloading via FetchContent...")
+        include(FetchContent)
+        FetchContent_Declare(
+            JUCE
+            GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+            GIT_TAG 7.0.12
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(JUCE)
+    endif()
 endif()
+
 
 # ===========================================================================
 # Main GUI Application

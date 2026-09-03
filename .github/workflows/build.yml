@@ -5,6 +5,7 @@ on:
     branches: [ main, master, develop ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -14,8 +15,18 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Cache JUCE Framework
+        id: cache-juce
+        uses: actions/cache@v4
         with:
-          submodules: recursive
+          path: JUCE
+          key: ${{ runner.os }}-juce-7.0.12
+
+      - name: Fetch JUCE (if not cached)
+        if: steps.cache-juce.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
 
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
@@ -26,6 +37,10 @@ jobs:
         run: |
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 
-      - name: Build LoopStation
+      - name: Build LoopStation & Unit Tests
         run: |
           cmake --build build --config Release
+
+      - name: Run Automated Test Suite
+        run: |
+          .\build\LoopStation_Tests_artefacts\Release\LoopStation_Tests.exe
