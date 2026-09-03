@@ -1,0 +1,31 @@
+name: Build and Test (CI)
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-windows:
+    name: Windows MSVC (JUCE + CMake)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.25.x'
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build LoopStation
+        run: |
+          cmake --build build --config Release

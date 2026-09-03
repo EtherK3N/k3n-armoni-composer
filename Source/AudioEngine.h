@@ -1,0 +1,111 @@
+/*
+    AudioEngine.h
+    -------------
+    Multichannel real-time JUCE audio engine:
+      - 32-voice polyphony with low-overhead voice stealing
+      - Pre-cached RAM sample pool (zero memory allocations or disk I/O in the audio thread)
+      - Synchronous sample-accurate multi-track Looper (LoopTrack)
+      - Built-in Procedural Drum Synthesizer (Instant Out-Of-The-Box Playability with zero external files)
+*/
+
+#pragma once
+
+#include <JuceHeader.h>
+#include <array>
+#include <unordered_map>
+#include <string>
+
+class AudioEngine;
+
+/** A single sampler voice (one-shot or looper trigger playback). */
+struct SamplerVoice
+{
+    const juce::AudioBuffer<float>* sourceBuffer = nullptr;
+    int position = 0;
+    float gain = 1.0f;
+    bool isActive = false;
+};
+
+/** A discrete trigger event recorded in a looper lane. */
+struct TriggerEvent
+{
+    int sampleHandle = -1;
+    juce::int64 offsetSamples = 0;
+};
+
+/** Multi-track looper lane synchronized directly to audio samples. */
+class LoopTrack
+{
+public:
+    LoopTrack();
+
+    void startRecording();
+    void stopRecordingAndStartLoop();
+    void clear();
+    void setMuted(bool shouldBeMuted) { muted = shouldBeMuted; }
+    bool isMuted() const { return muted; }
+    bool isEmpty() const { return recordedEvents.isEmpty(); }
+    bool isRecording() const { return recording; }
+
+    void recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples);
+    juce::int64 getLoopLengthSamples() const { return loopLengthSamples; }
+
+    /** Advances playback position for the current audio block and emits triggers. */
+    void processAudioBlock(int numSamples, AudioEngine& engine);
+
+    juce::Array<TriggerEvent> recordedEvents;
+
+private:
+    bool muted = false;
+    bool recording = false;
+    juce::int64 loopLengthSamples = 0;
+    juce::int64 playbackPositionSamples = 0;
+};
+
+class AudioEngine : public juce::AudioSource
+{
+public:
+    AudioEngine();
+    ~AudioEngine() override;
+
+    // juce::AudioSource
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+    void releaseResources() override;
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
+
+    /** Loads an audio file into RAM cache. Returns cached handle if already loaded. */
+    int loadSample(const juce::File& audioFile);
+
+    /** Adds a pre-generated AudioBuffer directly into the memory cache. */
+    int addMemoryBuffer(std::unique_ptr<juce::AudioBuffer<float>> buffer, const juce::String& identifier);
+
+    /** Generates built-in procedural electronic drumkit (Kick, Snare, Hi-Hat, 808 Bass, Synth Lead). */
+    void generateDefaultStarterKit();
+
+    /** Finds cached sample handle for an absolute path or memory identifier. Returns -1 if not found. */
+    int findSampleHandle(const juce::String& identifier) const;
+
+    /** Instant real-time safe sample triggering. */
+    void triggerSample(int sampleHandle, float gain = 1.0f);
+
+    /** Registers a loop track for synchronous audio block processing. */
+    void registerLoopTrack(LoopTrack* track);
+    void unregisterLoopTrack(LoopTrack* track);
+
+    double getSampleRate() const { return currentSampleRate; }
+
+    static constexpr int maxVoices = 32;
+
+private:
+    juce::AudioFormatManager formatManager;
+    juce::OwnedArray<juce::AudioBuffer<float>> loadedSamples;
+    std::unordered_map<std::string, int> samplePathToHandle;
+
+    std::array<SamplerVoice, maxVoices> voices;
+    juce::Array<LoopTrack*> activeLoopTracks;
+
+    double currentSampleRate = 44100.0;
+    juce::CriticalSection audioLock;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
+};
