@@ -3,546 +3,581 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K3N Armoni Composer • Modular Live Multi-Keyboard LoopStation & Remix Rig</title>
+  <title>K3N Armoni Composer • Professional Audio Workstation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-deep: #050608;
-      --bg-surface: #0a0d14;
-      --bg-panel: rgba(16, 21, 32, 0.75);
-      --bg-card: rgba(24, 32, 48, 0.6);
-      --bg-card-hover: rgba(36, 48, 72, 0.8);
+      --bg-base: #06070a;
+      --bg-surface-1: #0c0f16;
+      --bg-surface-2: #121722;
+      --bg-surface-3: #182030;
+      --bg-surface-hover: #222c42;
       
-      --neon-violet: #a855f7;
-      --neon-cyan: #00f2fe;
-      --neon-emerald: #10b981;
-      --neon-amber: #f59e0b;
-      --neon-rose: #f43f5e;
+      --accent-violet: #9333ea;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
       
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-dim: #64748b;
+      --border-subtle: #1a2233;
+      --border-light: #2a3752;
+      --border-glow: rgba(6, 182, 212, 0.4);
       
-      --grad-prometeo: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #10b981 100%);
+      --text-main: #f8fafc;
+      --text-muted: #8492a6;
+      --text-dim: #475569;
+
+      --grad-prometeo: linear-gradient(135deg, #9333ea 0%, #2563eb 50%, #10b981 100%);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
     body {
-      background-color: var(--bg-deep);
-      color: var(--text-primary);
-      font-family: 'Outfit', -apple-system, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background-image: 
-        radial-gradient(circle at 15% 10%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
     }
 
-    /* Master Top Header */
+    /* Top Master Bar */
     header {
-      background: rgba(10, 13, 20, 0.85);
-      backdrop-filter: blur(20px);
+      background: var(--bg-surface-1);
       border-bottom: 1px solid var(--border-subtle);
-      padding: 8px 20px;
+      padding: 6px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 54px;
+      height: 52px;
       z-index: 100;
     }
 
-    .brand-group { display: flex; align-items: center; gap: 12px; }
-    .prometeo-flame {
-      width: 34px; height: 34px;
-      filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.7));
+    .brand-section { display: flex; align-items: center; gap: 10px; }
+    .prometeo-symbol {
+      width: 30px; height: 30px;
+      filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.6));
     }
-    .brand-title-wrap { display: flex; flex-direction: column; }
+    .brand-title-box { display: flex; flex-direction: column; }
     .brand-title {
-      font-size: 15px; font-weight: 900; letter-spacing: 0.8px;
-      background: linear-gradient(90deg, #fff 0%, #c084fc 45%, #34d399 100%);
+      font-size: 14px; font-weight: 900; letter-spacing: 0.8px;
+      background: linear-gradient(90deg, #ffffff 0%, #c084fc 50%, #34d399 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .brand-subtitle { font-size: 8.5px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-dim); }
+    .brand-version { font-size: 8.5px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); font-weight: 700; letter-spacing: 1px; }
 
-    /* Top HUD */
-    .header-hud {
-      display: flex; align-items: center; gap: 14px; background: rgba(6, 8, 12, 0.8);
-      border: 1px solid var(--border-subtle); border-radius: 8px; padding: 4px 12px;
+    /* Center Metronome & Realtime Clock */
+    .master-clock-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg-surface-2); border: 1px solid var(--border-subtle);
+      border-radius: 6px; padding: 4px 12px;
     }
-    #scopeCanvas { width: 130px; height: 26px; background: #020305; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
 
+    .metro-led {
+      width: 10px; height: 10px; border-radius: 50%; background: #1e293b;
+      transition: all 0.05s ease;
+    }
+    .metro-led.flash {
+      background: var(--accent-emerald); box-shadow: 0 0 10px var(--accent-emerald); transform: scale(1.2);
+    }
+
+    .bpm-control-wrap {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    }
+    .bpm-control-wrap input[type=number] {
+      width: 44px; background: transparent; border: none; color: var(--accent-emerald);
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; text-align: center;
+    }
+
+    #scopeCanvas {
+      width: 120px; height: 24px; background: #020305; border-radius: 3px; border: 1px solid var(--border-subtle);
+    }
+
+    /* Buttons */
     .btn {
-      background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-subtle);
-      padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s ease;
+      background: var(--bg-surface-2); color: var(--text-main); border: 1px solid var(--border-subtle);
+      padding: 5px 12px; border-radius: 5px; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+      font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.12s ease;
     }
-    .btn:hover { background: var(--bg-card-hover); border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 242, 254, 0.25); }
+    .btn:hover { background: var(--bg-surface-hover); border-color: var(--accent-cyan); color: #fff; }
     .btn-prometeo { background: var(--grad-prometeo); color: #fff; border: none; }
-    .btn-danger { background: rgba(244, 63, 94, 0.12); border-color: rgba(244, 63, 94, 0.4); color: var(--neon-rose); }
+    .btn-prometeo:hover { filter: brightness(1.15); box-shadow: 0 0 14px rgba(147, 51, 234, 0.4); }
+    .btn-danger { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.35); color: var(--accent-rose); }
+    .btn-danger:hover { background: var(--accent-rose); color: #fff; }
 
-    /* Deck Selector Bar */
-    .deck-bar {
-      background: rgba(8, 11, 16, 0.95); border-bottom: 1px solid var(--border-subtle);
-      padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 40px;
+    /* Deck Switcher Toolbar */
+    .deck-switcher-bar {
+      background: #090c12; border-bottom: 1px solid var(--border-subtle);
+      padding: 0 18px; display: flex; justify-content: space-between; align-items: center; height: 38px;
     }
-    .deck-tabs { display: flex; gap: 4px; }
-    .deck-tab-btn {
-      padding: 6px 14px; font-size: 11px; font-weight: 700; color: var(--text-secondary);
-      cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid transparent;
-      display: flex; align-items: center; gap: 6px;
+    .deck-switch-tabs { display: flex; gap: 4px; }
+    .deck-btn {
+      padding: 6px 14px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; border-radius: 5px 5px 0 0;
+      border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 6px;
     }
-    .deck-tab-btn.active { color: #fff; background: rgba(16, 21, 32, 0.9); border-bottom: 2px solid var(--neon-cyan); }
-    .hardware-badge {
-      font-size: 8.5px; font-family: 'JetBrains Mono', monospace; padding: 2px 5px;
-      border-radius: 3px; background: rgba(0, 242, 254, 0.15); color: var(--neon-cyan);
+    .deck-btn:hover { color: #fff; }
+    .deck-btn.active { color: #fff; background: var(--bg-surface-1); border-bottom: 2px solid var(--accent-cyan); }
+    
+    .hw-tag {
+      font-size: 8px; font-family: 'JetBrains Mono', monospace; padding: 1px 4px;
+      border-radius: 3px; background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);
     }
 
-    /* Main Grid */
+    /* Studio Main Layout */
     main {
-      flex: 1; display: grid; grid-template-columns: 1fr 370px; gap: 12px;
-      padding: 12px 16px; overflow: hidden;
+      flex: 1; display: grid; grid-template-columns: 1fr 360px; gap: 10px;
+      padding: 10px 14px; overflow: hidden;
     }
-    .studio-left-col { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .main-left { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
 
-    /* Keyboard Deck */
-    .deck-panel {
-      background: var(--bg-panel); backdrop-filter: blur(16px); border: 1px solid var(--border-subtle);
-      border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+    /* Visual Hardware Keyboard Deck */
+    .deck-rig-panel {
+      background: var(--bg-surface-1); border: 1px solid var(--border-subtle);
+      border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
     }
-    .deck-header { display: flex; justify-content: space-between; align-items: center; }
+    .deck-rig-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #fff;
+    }
 
-    .virtual-keyboard-rig {
-      background: #040508; border: 1.5px solid #161c28; border-radius: 8px;
-      padding: 6px; display: flex; flex-direction: column; gap: 4px;
+    .keyboard-matrix {
+      background: #030406; border: 1px solid var(--border-subtle); border-radius: 6px;
+      padding: 6px; display: flex; flex-direction: column; gap: 3px;
     }
-    .key-row { display: flex; gap: 4px; justify-content: center; }
-    .key-cap {
-      height: 38px; min-width: 34px; background: #0f131c; border: 1px solid #1e2638;
-      border-radius: 5px; display: flex; flex-direction: column; align-items: center;
+    .key-row { display: flex; gap: 3px; justify-content: center; }
+    .key-unit {
+      height: 36px; min-width: 32px; background: #0e121a; border: 1px solid var(--border-subtle);
+      border-radius: 4px; display: flex; flex-direction: column; align-items: center;
       justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700;
-      font-size: 11px; color: #94a3b8; cursor: pointer; position: relative; transition: all 0.05s ease;
+      font-size: 10px; color: #8492a6; cursor: pointer; position: relative; transition: all 0.05s ease;
     }
-    .key-cap .sub-label { font-size: 7.5px; font-weight: 600; margin-top: 1px; }
-    .key-cap.w-1-5 { min-width: 48px; }
-    .key-cap.w-2 { min-width: 66px; }
-    .key-cap.w-space { min-width: 220px; }
+    .key-unit .key-subtext { font-size: 7px; font-weight: 600; margin-top: 1px; }
+    .key-unit.w-1-5 { min-width: 44px; }
+    .key-unit.w-2 { min-width: 60px; }
+    .key-unit.w-space { min-width: 210px; }
 
-    .key-cap.zone-drums { border-color: rgba(0, 242, 254, 0.45); color: var(--neon-cyan); background: rgba(0, 242, 254, 0.05); }
-    .key-cap.zone-drums .sub-label { color: var(--neon-cyan); }
-    .key-cap.zone-bass { border-color: rgba(168, 85, 247, 0.45); color: var(--neon-violet); background: rgba(168, 85, 247, 0.05); }
-    .key-cap.zone-bass .sub-label { color: var(--neon-violet); }
-    .key-cap.zone-synth { border-color: rgba(245, 158, 11, 0.45); color: var(--neon-amber); background: rgba(245, 158, 11, 0.05); }
-    .key-cap.zone-synth .sub-label { color: var(--neon-amber); }
-    .key-cap.zone-fx { border-color: rgba(16, 185, 129, 0.45); color: var(--neon-emerald); background: rgba(16, 185, 129, 0.05); }
-    .key-cap.zone-fx .sub-label { color: var(--neon-emerald); }
-    .key-cap.zone-custom { border-color: rgba(236, 72, 153, 0.5); color: #ec4899; background: rgba(236, 72, 153, 0.06); }
-    .key-cap.zone-custom .sub-label { color: #ec4899; }
+    /* Zone Color Highlights */
+    .key-unit.zone-drums { border-color: rgba(6, 182, 212, 0.45); color: var(--accent-cyan); background: rgba(6, 182, 212, 0.04); }
+    .key-unit.zone-drums .key-subtext { color: var(--accent-cyan); }
+    .key-unit.zone-bass { border-color: rgba(147, 51, 234, 0.45); color: var(--accent-violet); background: rgba(147, 51, 234, 0.04); }
+    .key-unit.zone-bass .key-subtext { color: var(--accent-violet); }
+    .key-unit.zone-synth { border-color: rgba(245, 158, 11, 0.45); color: var(--accent-amber); background: rgba(245, 158, 11, 0.04); }
+    .key-unit.zone-synth .key-subtext { color: var(--accent-amber); }
+    .key-unit.zone-fx { border-color: rgba(16, 185, 129, 0.45); color: var(--accent-emerald); background: rgba(16, 185, 129, 0.04); }
+    .key-unit.zone-fx .key-subtext { color: var(--accent-emerald); }
 
-    .key-cap.selected-target { outline: 2px solid #fff; box-shadow: 0 0 10px #fff; }
-    .key-cap.active { transform: translateY(1.5px); }
-    .key-cap.zone-drums.active { background: var(--neon-cyan) !important; color: #000 !important; }
-    .key-cap.zone-bass.active { background: var(--neon-violet) !important; color: #fff !important; }
-    .key-cap.zone-synth.active { background: var(--neon-amber) !important; color: #000 !important; }
-    .key-cap.zone-fx.active { background: var(--neon-emerald) !important; color: #000 !important; }
-    .key-cap.zone-custom.active { background: #ec4899 !important; color: #fff !important; }
+    .key-unit.selected-key { outline: 2px solid #fff; box-shadow: 0 0 8px #fff; }
+    .key-unit.active { transform: translateY(1.5px); }
+    .key-unit.zone-drums.active { background: var(--accent-cyan) !important; color: #000 !important; }
+    .key-unit.zone-bass.active { background: var(--accent-violet) !important; color: #fff !important; }
+    .key-unit.zone-synth.active { background: var(--accent-amber) !important; color: #000 !important; }
+    .key-unit.zone-fx.active { background: var(--accent-emerald) !important; color: #000 !important; }
 
-    /* Live Multi-Layer LoopStation Section */
-    .looper-deck {
-      background: var(--bg-panel); backdrop-filter: blur(16px); border: 1px solid var(--border-subtle);
-      border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1;
+    /* Multi-Track Live LoopStation */
+    .looper-rig-panel {
+      background: var(--bg-surface-1); border: 1px solid var(--border-subtle);
+      border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1;
     }
-    .looper-header-row { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 800; }
-    .loop-strips-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
-
-    .loop-strip {
-      background: rgba(8, 11, 16, 0.9); border: 1.5px solid var(--border-subtle);
-      border-radius: 7px; padding: 6px 10px; display: flex; align-items: center; gap: 10px;
+    .looper-top-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #fff;
     }
-    .loop-strip.state-rec { border-color: var(--neon-rose); box-shadow: 0 0 14px rgba(244, 63, 94, 0.3); }
-    .loop-strip.state-play { border-color: var(--neon-emerald); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
-    .loop-strip.state-dub { border-color: var(--neon-amber); box-shadow: 0 0 12px rgba(245, 158, 11, 0.25); }
 
-    .strip-meta { width: 110px; display: flex; flex-direction: column; gap: 1px; }
-    .strip-name { font-size: 11px; font-weight: 800; color: #fff; }
-    .strip-status {
+    .track-strips-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+
+    .layer-strip {
+      background: var(--bg-surface-2); border: 1px solid var(--border-subtle);
+      border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 10px;
+    }
+    .layer-strip.state-rec { border-color: var(--accent-rose); box-shadow: 0 0 10px rgba(244, 63, 94, 0.25); }
+    .layer-strip.state-play { border-color: var(--accent-emerald); box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
+    .layer-strip.state-dub { border-color: var(--accent-amber); box-shadow: 0 0 10px rgba(245, 158, 11, 0.25); }
+
+    .layer-id-box { width: 100px; display: flex; flex-direction: column; gap: 1px; }
+    .layer-name { font-size: 11px; font-weight: 800; color: #fff; }
+    .layer-badge {
       font-size: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
-      text-transform: uppercase; padding: 1px 4px; border-radius: 3px; width: fit-content;
+      padding: 1px 4px; border-radius: 2px; width: fit-content; text-transform: uppercase;
     }
-    .status-empty { background: #161e2e; color: var(--text-dim); }
-    .status-rec { background: var(--neon-rose); color: #fff; }
-    .status-play { background: var(--neon-emerald); color: #000; }
-    .status-dub { background: var(--neon-amber); color: #000; }
+    .badge-empty { background: #1a2233; color: var(--text-dim); }
+    .badge-rec { background: var(--accent-rose); color: #fff; }
+    .badge-play { background: var(--accent-emerald); color: #000; }
+    .badge-dub { background: var(--accent-amber); color: #000; }
 
-    .btn-loop-trigger {
-      height: 36px; min-width: 100px; font-size: 10.5px; font-weight: 800;
-      border-radius: 6px; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 4px;
+    .btn-loop-action {
+      height: 34px; min-width: 90px; font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      font-weight: 800; border-radius: 5px; cursor: pointer; border: none;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
     }
-    .trigger-idle { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
-    .trigger-rec { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
-    .trigger-play { background: linear-gradient(135deg, #f59e0b, #b45309); color: #000; }
-    .trigger-dub { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
+    .act-idle { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
+    .act-rec { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
+    .act-play { background: linear-gradient(135deg, #f59e0b, #b45309); color: #000; }
+    .act-dub { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
 
-    .loop-wave-box {
-      flex: 1; height: 36px; background: #030407; border: 1px solid #141b26;
+    .layer-wave-view {
+      flex: 1; height: 34px; background: #030406; border: 1px solid var(--border-subtle);
       border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: center;
     }
-    .playhead-scanner {
+    .playhead-needle {
       position: absolute; top: 0; bottom: 0; width: 2px; background: #fff;
-      box-shadow: 0 0 8px #fff; left: 0%; display: none; z-index: 10;
+      box-shadow: 0 0 6px #fff; left: 0%; display: none; z-index: 10;
     }
-    .loop-strip.state-play .playhead-scanner,
-    .loop-strip.state-dub .playhead-scanner { display: block; }
-    .hit-dots-wrap { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; align-items: center; }
-    .hit-marker { position: absolute; width: 5px; height: 20px; border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 6px currentColor; }
+    .layer-strip.state-play .playhead-needle,
+    .layer-strip.state-dub .playhead-needle { display: block; }
+    .layer-dots-plane { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; align-items: center; }
+    .hit-dot { position: absolute; width: 4px; height: 18px; border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 4px currentColor; }
 
-    /* Per-Layer FX Routing Toggles */
-    .strip-fx-toggles {
-      display: flex; gap: 3px;
-    }
-    .fx-toggle-pill {
+    .layer-fx-bar { display: flex; gap: 2px; }
+    .fx-pill {
       font-size: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
-      padding: 2px 4px; border-radius: 3px; cursor: pointer; border: 1px solid var(--border-subtle);
-      background: var(--bg-card); color: var(--text-dim);
+      padding: 2px 4px; border-radius: 2px; cursor: pointer; border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-3); color: var(--text-dim);
     }
-    .fx-toggle-pill.active {
-      border-color: var(--neon-cyan); background: rgba(0, 242, 254, 0.2); color: var(--neon-cyan);
+    .fx-pill.active { border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); }
+
+    .layer-controls { display: flex; align-items: center; gap: 4px; }
+    .layer-fader { display: flex; flex-direction: column; align-items: center; font-size: 7.5px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
+    .layer-fader input[type=range] { width: 46px; accent-color: var(--accent-emerald); }
+
+    /* Right Column: FX Rack & Sound Matrix */
+    .main-right { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+
+    .panel-box {
+      background: var(--bg-surface-1); border: 1px solid var(--border-subtle);
+      border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .panel-title {
+      font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #fff;
+      display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;
     }
 
-    .strip-mix { display: flex; align-items: center; gap: 5px; }
-    .vol-slider-wrap { display: flex; flex-direction: column; align-items: center; font-size: 8px; color: var(--text-dim); }
-    .vol-slider-wrap input[type=range] { width: 50px; accent-color: var(--neon-emerald); }
-
-    /* Right Column */
-    .studio-right-col { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-
-    .fx-rack-panel, .vault-panel {
-      background: var(--bg-panel); backdrop-filter: blur(16px); border: 1px solid var(--border-subtle);
-      border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    .fx-grid-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .fx-slot {
+      background: var(--bg-surface-2); border: 1px solid var(--border-subtle);
+      border-radius: 5px; padding: 6px; display: flex; flex-direction: column; gap: 3px;
     }
-    .rack-heading {
-      font-size: 11.5px; font-weight: 800; color: #fff; display: flex; justify-content: space-between;
-      align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 5px;
+    .slot-label-row {
+      display: flex; justify-content: space-between; font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
     }
+    .slider-param { display: flex; flex-direction: column; gap: 1px; font-size: 8.5px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+    .slider-param label { display: flex; justify-content: space-between; }
+    input[type=range] { accent-color: var(--accent-cyan); }
 
-    .modular-fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .fx-card {
-      background: rgba(10, 13, 20, 0.85); border: 1px solid var(--border-subtle);
-      border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px;
+    /* Sound Vault Table */
+    .sound-vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; max-height: 190px; overflow-y: auto; }
+    .vault-cell {
+      background: var(--bg-surface-2); border: 1px solid var(--border-subtle); border-radius: 3px;
+      padding: 5px; font-size: 9px; font-family: 'JetBrains Mono', monospace; font-weight: 600; cursor: pointer; text-align: center;
     }
-    .macro-slider-group { display: flex; flex-direction: column; gap: 2px; font-size: 9px; color: var(--text-secondary); }
-    .macro-slider-group label { display: flex; justify-content: space-between; }
-    input[type=range] { accent-color: var(--neon-cyan); }
+    .vault-cell:hover { border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1); }
 
-    /* Sound Vault Grid */
-    .vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; max-height: 180px; overflow-y: auto; }
-    .vault-item {
-      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 4px;
-      padding: 5px 6px; font-size: 9.5px; font-weight: 600; cursor: pointer; text-align: center;
+    .custom-file-upload-strip {
+      border: 1px dashed var(--accent-violet); border-radius: 4px; padding: 8px;
+      text-align: center; cursor: pointer; background: rgba(147, 51, 234, 0.05);
+      font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-violet);
     }
-    .vault-item:hover { border-color: var(--neon-cyan); background: rgba(0, 242, 254, 0.1); }
-
-    /* File Import Box */
-    .file-dropzone-box {
-      border: 1.5px dashed rgba(236, 72, 153, 0.5); border-radius: 6px; padding: 10px;
-      text-align: center; cursor: pointer; background: rgba(236, 72, 153, 0.05); transition: all 0.2s;
-    }
-    .file-dropzone-box:hover { border-color: #ec4899; background: rgba(236, 72, 153, 0.1); }
+    .custom-file-upload-strip:hover { background: rgba(147, 51, 234, 0.1); }
 
     footer {
-      background: rgba(6, 8, 12, 0.95); border-top: 1px solid var(--border-subtle);
-      padding: 6px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; color: var(--text-dim);
+      background: var(--bg-surface-1); border-top: 1px solid var(--border-subtle);
+      padding: 4px 18px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 9px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim);
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Header -->
+  <!-- Top Master Bar -->
   <header>
-    <div class="brand-group">
-      <svg class="prometeo-flame" viewBox="0 0 100 100" fill="none">
+    <div class="brand-section">
+      <svg class="prometeo-symbol" viewBox="0 0 100 100" fill="none">
         <defs>
-          <linearGradient id="prometeoMasterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#a855f7" />
-            <stop offset="50%" stop-color="#3b82f6" />
+          <linearGradient id="prometeoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9333ea" />
+            <stop offset="50%" stop-color="#2563eb" />
             <stop offset="100%" stop-color="#10b981" />
           </linearGradient>
         </defs>
-        <path d="M50 6C50 6 28 26 28 52C28 72 40 88 50 94C60 88 72 72 72 52C72 26 50 6 50 6Z" fill="url(#prometeoMasterGrad)" />
-        <circle cx="50" cy="56" r="6.5" fill="#fff" />
+        <path d="M50 6C50 6 28 26 28 52C28 72 40 88 50 94C60 88 72 72 72 52C72 26 50 6 50 6Z" fill="url(#prometeoGrad)" />
+        <circle cx="50" cy="56" r="6" fill="#fff" />
       </svg>
-      <div class="brand-title-wrap">
+      <div class="brand-title-box">
         <div class="brand-title">K3N ARMONI COMPOSER</div>
-        <div class="brand-subtitle">PROMETEO MODULAR LOOPSTATION RIG</div>
+        <div class="brand-version">PROMETEO ENGINE v0.1.0 • RAW INPUT RIG</div>
       </div>
     </div>
 
-    <!-- Top HUD -->
-    <div class="header-hud">
-      <canvas id="scopeCanvas"></canvas>
-      <div style="display:flex; flex-direction:column; font-size:9px; font-family:'JetBrains Mono', monospace; color:var(--text-dim);">
+    <!-- Master Clock & Metronome Bar -->
+    <div class="master-clock-bar">
+      <div class="metro-led" id="metroLed"></div>
+      <div class="bpm-control-wrap">
         <span>BPM</span>
-        <strong style="color:var(--neon-cyan);" id="bpmDisplay">120</strong>
+        <input type="number" id="bpmInputVal" value="120" min="40" max="240" onchange="changeBpm()">
       </div>
+      <button class="btn" style="padding: 2px 6px; font-size: 9px;" onclick="toggleMetronomeAudio()">CLICK: <span id="metroTxt">ON</span></button>
+      <canvas id="scopeCanvas"></canvas>
     </div>
 
-    <div style="display: flex; gap: 8px;">
-      <button class="btn btn-prometeo" onclick="addNewLoopLayer()">➕ Add Layer</button>
-      <button class="btn" onclick="stopAllPlayback()">⏹ Stop Loops</button>
-      <button class="btn btn-danger" onclick="resetMasterStation()">🗑️ Reset</button>
+    <div style="display: flex; gap: 6px;">
+      <button class="btn btn-prometeo" onclick="addNewLayerTrack()">+ LAYER</button>
+      <button class="btn" onclick="stopAllPlayback()">STOP</button>
+      <button class="btn btn-danger" onclick="resetMasterStation()">RESET</button>
     </div>
   </header>
 
-  <!-- Hardware Deck Switcher -->
-  <div class="deck-bar">
-    <div class="deck-tabs">
-      <div class="deck-tab-btn active" onclick="switchHardwareDeck('split')">
-        <span>⚡ Unified Split Deck (Single Keyboard)</span>
-        <span class="hardware-badge">PORTABLE</span>
+  <!-- Deck Switcher -->
+  <div class="deck-switcher-bar">
+    <div class="deck-switch-tabs">
+      <div class="deck-btn active" onclick="selectDeckProfile('split')">
+        <span>DECK ALL: SPLIT MODE</span>
+        <span class="hw-tag">1 KEYBOARD</span>
       </div>
-      <div class="deck-tab-btn" onclick="switchHardwareDeck('deck_drums')">
-        <span>🥁 Deck A: USB Keyboard #1 (Drums Master)</span>
-        <span class="hardware-badge">RAW INPUT</span>
+      <div class="deck-btn" onclick="selectDeckProfile('deck_drums')">
+        <span>DECK 1: DRUMS & PERCUSSION</span>
+        <span class="hw-tag">RIG A</span>
       </div>
-      <div class="deck-tab-btn" onclick="switchHardwareDeck('deck_bass')">
-        <span>🎸 Deck B: USB Keyboard #2 (808 Sub Station)</span>
-        <span class="hardware-badge">RAW INPUT</span>
+      <div class="deck-btn" onclick="selectDeckProfile('deck_bass')">
+        <span>DECK 2: 808 SUB BASS</span>
+        <span class="hw-tag">RIG B</span>
       </div>
-      <div class="deck-tab-btn" onclick="switchHardwareDeck('deck_synth')">
-        <span>🎹 Deck C: USB Keyboard #3 (Polyphonic Lead)</span>
-        <span class="hardware-badge">RAW INPUT</span>
+      <div class="deck-btn" onclick="selectDeckProfile('deck_synth')">
+        <span>DECK 3: POLYPHONIC SYNTH</span>
+        <span class="hw-tag">RIG C</span>
       </div>
+    </div>
+    <div style="font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim);">
+      USB HID MULTI-DEVICE SUPPORT: <strong style="color: var(--accent-emerald);">UP TO 16 KEYBOARDS</strong>
     </div>
   </div>
 
-  <!-- Main View -->
+  <!-- Studio Layout -->
   <main>
-    <!-- Left: Virtual Keyboard + Live Multi-Layer LoopStation -->
-    <div class="studio-left-col">
-      <div class="deck-panel">
-        <div class="deck-header">
-          <div style="font-size: 12px; font-weight: 800;" id="deckHeaderTitle">
-            🎹 Visual Instrument Keyboard
-          </div>
+    <!-- Left Column: Active Deck Matrix + Live LoopStation -->
+    <div class="main-left">
+      <div class="deck-rig-panel">
+        <div class="deck-rig-header">
+          <span id="deckRigTitle">ACTIVE DECK: UNIFIED KEYBOARD RIG</span>
           <div style="display: flex; gap: 4px;">
-            <button class="btn" style="padding: 2px 6px; font-size: 9.5px;" onclick="loadQuickPreset('trap')">Trap 808</button>
-            <button class="btn" style="padding: 2px 6px; font-size: 9.5px;" onclick="loadQuickPreset('synthwave')">Synthwave</button>
-            <button class="btn" style="padding: 2px 6px; font-size: 9.5px;" onclick="loadQuickPreset('lofi')">Lo-Fi</button>
+            <button class="btn" style="padding: 1px 6px; font-size: 9px;" onclick="loadRigPreset('trap')">TRAP 808</button>
+            <button class="btn" style="padding: 1px 6px; font-size: 9px;" onclick="loadRigPreset('synthwave')">SYNTHWAVE</button>
+            <button class="btn" style="padding: 1px 6px; font-size: 9px;" onclick="loadRigPreset('acoustic')">ACOUSTIC</button>
           </div>
         </div>
 
-        <div class="virtual-keyboard-rig">
+        <div class="keyboard-matrix">
           <div class="key-row">
-            <div class="key-cap" id="key-`" onclick="selectKeyToInspect('`')">`</div>
-            <div class="key-cap zone-drums" id="key-1" onclick="selectKeyToInspect('1')">1<span class="sub-label">Kick</span></div>
-            <div class="key-cap zone-drums" id="key-2" onclick="selectKeyToInspect('2')">2<span class="sub-label">Snare</span></div>
-            <div class="key-cap zone-drums" id="key-3" onclick="selectKeyToInspect('3')">3<span class="sub-label">Hat</span></div>
-            <div class="key-cap zone-bass" id="key-4" onclick="selectKeyToInspect('4')">4<span class="sub-label">808</span></div>
-            <div class="key-cap zone-synth" id="key-5" onclick="selectKeyToInspect('5')">5<span class="sub-label">Lead</span></div>
-            <div class="key-cap" id="key-6" onclick="selectKeyToInspect('6')">6</div>
-            <div class="key-cap" id="key-7" onclick="selectKeyToInspect('7')">7</div>
-            <div class="key-cap" id="key-8" onclick="selectKeyToInspect('8')">8</div>
-            <div class="key-cap" id="key-9" onclick="selectKeyToInspect('9')">9</div>
-            <div class="key-cap" id="key-0" onclick="selectKeyToInspect('0')">0</div>
-            <div class="key-cap" id="key--" onclick="selectKeyToInspect('-')">-</div>
-            <div class="key-cap" id="key-=" onclick="selectKeyToInspect('=')">=</div>
-            <div class="key-cap w-1-5" id="key-backspace">⌫</div>
+            <div class="key-unit" id="key-`" onclick="pickKeyToInspect('`')">`</div>
+            <div class="key-unit zone-drums" id="key-1" onclick="pickKeyToInspect('1')">1<span class="key-subtext">Kick</span></div>
+            <div class="key-unit zone-drums" id="key-2" onclick="pickKeyToInspect('2')">2<span class="key-subtext">Snare</span></div>
+            <div class="key-unit zone-drums" id="key-3" onclick="pickKeyToInspect('3')">3<span class="key-subtext">Hat</span></div>
+            <div class="key-unit zone-bass" id="key-4" onclick="pickKeyToInspect('4')">4<span class="key-subtext">808</span></div>
+            <div class="key-unit zone-synth" id="key-5" onclick="pickKeyToInspect('5')">5<span class="key-subtext">Lead</span></div>
+            <div class="key-unit" id="key-6" onclick="pickKeyToInspect('6')">6</div>
+            <div class="key-unit" id="key-7" onclick="pickKeyToInspect('7')">7</div>
+            <div class="key-unit" id="key-8" onclick="pickKeyToInspect('8')">8</div>
+            <div class="key-unit" id="key-9" onclick="pickKeyToInspect('9')">9</div>
+            <div class="key-unit" id="key-0" onclick="pickKeyToInspect('0')">0</div>
+            <div class="key-unit" id="key--" onclick="pickKeyToInspect('-')">-</div>
+            <div class="key-unit" id="key-=" onclick="pickKeyToInspect('=')">=</div>
+            <div class="key-unit w-1-5" id="key-backspace">BKSP</div>
           </div>
 
           <div class="key-row">
-            <div class="key-cap w-1-5" id="key-tab">Tab</div>
-            <div class="key-cap zone-drums" id="key-q" onclick="selectKeyToInspect('q')">Q<span class="sub-label">808 Kick</span></div>
-            <div class="key-cap zone-drums" id="key-w" onclick="selectKeyToInspect('w')">W<span class="sub-label">Snare</span></div>
-            <div class="key-cap zone-drums" id="key-e" onclick="selectKeyToInspect('e')">E<span class="sub-label">Cl. Hat</span></div>
-            <div class="key-cap zone-drums" id="key-r" onclick="selectKeyToInspect('r')">R<span class="sub-label">Op. Hat</span></div>
-            <div class="key-cap zone-drums" id="key-t" onclick="selectKeyToInspect('t')">T<span class="sub-label">909 Clap</span></div>
-            <div class="key-cap zone-drums" id="key-y" onclick="selectKeyToInspect('y')">Y<span class="sub-label">Tom</span></div>
-            <div class="key-cap" id="key-u" onclick="selectKeyToInspect('u')">U<span class="sub-label">Rim</span></div>
-            <div class="key-cap" id="key-i" onclick="selectKeyToInspect('i')">I<span class="sub-label">Crash</span></div>
-            <div class="key-cap" id="key-o" onclick="selectKeyToInspect('o')">O</div>
-            <div class="key-cap" id="key-p" onclick="selectKeyToInspect('p')">P</div>
-            <div class="key-cap" id="key-[">[</div>
-            <div class="key-cap" id="key-]">]</div>
-            <div class="key-cap" id="key-\">\</div>
+            <div class="key-unit w-1-5" id="key-tab">TAB</div>
+            <div class="key-unit zone-drums" id="key-q" onclick="pickKeyToInspect('q')">Q<span class="key-subtext">Kick 808</span></div>
+            <div class="key-unit zone-drums" id="key-w" onclick="pickKeyToInspect('w')">W<span class="key-subtext">Snare</span></div>
+            <div class="key-unit zone-drums" id="key-e" onclick="pickKeyToInspect('e')">E<span class="key-subtext">Cl.Hat</span></div>
+            <div class="key-unit zone-drums" id="key-r" onclick="pickKeyToInspect('r')">R<span class="key-subtext">Op.Hat</span></div>
+            <div class="key-unit zone-drums" id="key-t" onclick="pickKeyToInspect('t')">T<span class="key-subtext">Clap 909</span></div>
+            <div class="key-unit zone-drums" id="key-y" onclick="pickKeyToInspect('y')">Y<span class="key-subtext">Tom</span></div>
+            <div class="key-unit" id="key-u" onclick="pickKeyToInspect('u')">U<span class="key-subtext">Rim</span></div>
+            <div class="key-unit" id="key-i" onclick="pickKeyToInspect('i')">I<span class="key-subtext">Crash</span></div>
+            <div class="key-unit" id="key-o" onclick="pickKeyToInspect('o')">O</div>
+            <div class="key-unit" id="key-p" onclick="pickKeyToInspect('p')">P</div>
+            <div class="key-unit" id="key-[">[</div>
+            <div class="key-unit" id="key-]">]</div>
+            <div class="key-unit" id="key-\">\</div>
           </div>
 
           <div class="key-row">
-            <div class="key-cap w-1-5" id="key-caps">Caps</div>
-            <div class="key-cap zone-bass" id="key-a" onclick="selectKeyToInspect('a')">A<span class="sub-label">Sub A1</span></div>
-            <div class="key-cap zone-bass" id="key-s" onclick="selectKeyToInspect('s')">S<span class="sub-label">Sub C2</span></div>
-            <div class="key-cap zone-bass" id="key-d" onclick="selectKeyToInspect('d')">D<span class="sub-label">Sub D2</span></div>
-            <div class="key-cap zone-bass" id="key-f" onclick="selectKeyToInspect('f')">F<span class="sub-label">Sub E2</span></div>
-            <div class="key-cap zone-bass" id="key-g" onclick="selectKeyToInspect('g')">G<span class="sub-label">Sub G2</span></div>
-            <div class="key-cap zone-bass" id="key-h" onclick="selectKeyToInspect('h')">H<span class="sub-label">Sub A2</span></div>
-            <div class="key-cap" id="key-j" onclick="selectKeyToInspect('j')">J</div>
-            <div class="key-cap" id="key-k" onclick="selectKeyToInspect('k')">K</div>
-            <div class="key-cap" id="key-l" onclick="selectKeyToInspect('l')">L</div>
-            <div class="key-cap" id="key-;">;</div>
-            <div class="key-cap" id="key-'">'</div>
-            <div class="key-cap w-2" id="key-enter">Enter</div>
+            <div class="key-unit w-1-5" id="key-caps">CAPS</div>
+            <div class="key-unit zone-bass" id="key-a" onclick="pickKeyToInspect('a')">A<span class="key-subtext">Sub A1</span></div>
+            <div class="key-unit zone-bass" id="key-s" onclick="pickKeyToInspect('s')">S<span class="key-subtext">Sub C2</span></div>
+            <div class="key-unit zone-bass" id="key-d" onclick="pickKeyToInspect('d')">D<span class="key-subtext">Sub D2</span></div>
+            <div class="key-unit zone-bass" id="key-f" onclick="pickKeyToInspect('f')">F<span class="key-subtext">Sub E2</span></div>
+            <div class="key-unit zone-bass" id="key-g" onclick="pickKeyToInspect('g')">G<span class="key-subtext">Sub G2</span></div>
+            <div class="key-unit zone-bass" id="key-h" onclick="pickKeyToInspect('h')">H<span class="key-subtext">Sub A2</span></div>
+            <div class="key-unit" id="key-j" onclick="pickKeyToInspect('j')">J</div>
+            <div class="key-unit" id="key-k" onclick="pickKeyToInspect('k')">K</div>
+            <div class="key-unit" id="key-l" onclick="pickKeyToInspect('l')">L</div>
+            <div class="key-unit" id="key-;">;</div>
+            <div class="key-unit" id="key-'">'</div>
+            <div class="key-unit w-2" id="key-enter">ENTER</div>
           </div>
 
           <div class="key-row">
-            <div class="key-cap w-2" id="key-shift">Shift</div>
-            <div class="key-cap zone-synth" id="key-z" onclick="selectKeyToInspect('z')">Z<span class="sub-label">Lead A4</span></div>
-            <div class="key-cap zone-synth" id="key-x" onclick="selectKeyToInspect('x')">X<span class="sub-label">Lead C5</span></div>
-            <div class="key-cap zone-synth" id="key-c" onclick="selectKeyToInspect('c')">C<span class="sub-label">Lead D5</span></div>
-            <div class="key-cap zone-synth" id="key-v" onclick="selectKeyToInspect('v')">V<span class="sub-label">Lead E5</span></div>
-            <div class="key-cap zone-synth" id="key-b" onclick="selectKeyToInspect('b')">B<span class="sub-label">Lead G5</span></div>
-            <div class="key-cap zone-synth" id="key-n" onclick="selectKeyToInspect('n')">N<span class="sub-label">Lead A5</span></div>
-            <div class="key-cap" id="key-m" onclick="selectKeyToInspect('m')">M</div>
-            <div class="key-cap" id="key-,">,</div>
-            <div class="key-cap" id="key-.">.</div>
-            <div class="key-cap" id="key-/">/</div>
-            <div class="key-cap w-2" id="key-shift-r">Shift</div>
+            <div class="key-unit w-2" id="key-shift">SHIFT</div>
+            <div class="key-unit zone-synth" id="key-z" onclick="pickKeyToInspect('z')">Z<span class="key-subtext">Lead A4</span></div>
+            <div class="key-unit zone-synth" id="key-x" onclick="pickKeyToInspect('x')">X<span class="key-subtext">Lead C5</span></div>
+            <div class="key-unit zone-synth" id="key-c" onclick="pickKeyToInspect('c')">C<span class="key-subtext">Lead D5</span></div>
+            <div class="key-unit zone-synth" id="key-v" onclick="pickKeyToInspect('v')">V<span class="key-subtext">Lead E5</span></div>
+            <div class="key-unit zone-synth" id="key-b" onclick="pickKeyToInspect('b')">B<span class="key-subtext">Lead G5</span></div>
+            <div class="key-unit zone-synth" id="key-n" onclick="pickKeyToInspect('n')">N<span class="key-subtext">Lead A5</span></div>
+            <div class="key-unit" id="key-m" onclick="pickKeyToInspect('m')">M</div>
+            <div class="key-unit" id="key-,">,</div>
+            <div class="key-unit" id="key-.">.</div>
+            <div class="key-unit" id="key-/">/</div>
+            <div class="key-unit w-2" id="key-shift-r">SHIFT</div>
           </div>
 
           <div class="key-row">
-            <div class="key-cap" id="key-ctrl">Ctrl</div>
-            <div class="key-cap" id="key-alt">Alt</div>
-            <div class="key-cap w-space zone-fx" id="key- " onclick="selectKeyToInspect(' ')">SPACEBAR<span class="sub-label">✨ Laser Sweep FX</span></div>
-            <div class="key-cap" id="key-alt-r">Alt</div>
-            <div class="key-cap" id="key-ctrl-r">Ctrl</div>
+            <div class="key-unit" id="key-ctrl">CTRL</div>
+            <div class="key-unit" id="key-alt">ALT</div>
+            <div class="key-unit w-space zone-fx" id="key- " onclick="pickKeyToInspect(' ')">SPACEBAR<span class="key-subtext">Laser Sweep FX</span></div>
+            <div class="key-unit" id="key-alt-r">ALT</div>
+            <div class="key-unit" id="key-ctrl-r">CTRL</div>
           </div>
         </div>
       </div>
 
-      <!-- Live Multi-Layer LoopStation -->
-      <div class="looper-deck">
-        <div class="looper-header-row">
-          <span>🎛️ Live Multi-Layer Loop Rig (Click REC ➔ Play Keys ➔ Click PLAY to Loop!)</span>
-          <span style="font-size: 9.5px; color: var(--text-dim);">Per-Layer Modular FX Routing</span>
+      <!-- Live Multi-Track Looper -->
+      <div class="looper-rig-panel">
+        <div class="looper-top-meta">
+          <span>LIVE LOOPING ENGINE • SAMPLE-ACCURATE OVERDUB</span>
+          <span style="font-size: 9.5px; color: var(--text-dim);">AUTOMATIC BAR QUANTIZE</span>
         </div>
 
-        <div class="loop-strips-container" id="loopStripsWrap">
-          <!-- Rendered dynamically -->
+        <div class="track-strips-list" id="trackStripsContainer">
+          <!-- Dynamically populated -->
         </div>
       </div>
     </div>
 
-    <!-- Right: Modular FX & Sound Vault / Sample Uploader -->
-    <div class="studio-right-col">
-      <!-- Modular FX Rack -->
-      <div class="fx-rack-panel">
-        <div class="rack-heading">
-          <span>🎛️ Master DSP FX Rack</span>
-          <span style="font-size: 9px; color: var(--neon-emerald);">ACTIVE</span>
+    <!-- Right Column: Modular FX Rack & Sound Vault -->
+    <div class="main-right">
+      
+      <!-- Master DSP FX Rack -->
+      <div class="panel-box">
+        <div class="panel-title">
+          <span>MODULAR DSP RACK</span>
+          <span style="font-size: 8.5px; color: var(--accent-emerald);">MASTER INSERTS</span>
         </div>
 
-        <div class="modular-fx-grid">
-          <div class="fx-card">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
-              <span>🔊 Delay / Echo</span>
-              <input type="checkbox" id="fxDelayCheck" onchange="syncLiveDspNodes()">
+        <div class="fx-grid-matrix">
+          <div class="fx-slot">
+            <div class="slot-label-row">
+              <span>DELAY</span>
+              <input type="checkbox" id="chkDelay" onchange="syncDspState()">
             </div>
-            <div class="macro-slider-group">
-              <label><span>Time</span><span id="txtDelayTime">0.25s</span></label>
-              <input type="range" min="0.05" max="0.75" step="0.01" value="0.25" id="slDelayTime" oninput="syncLiveDspNodes()">
+            <div class="slider-param">
+              <label><span>Time</span><span id="lblDelayTime">0.25s</span></label>
+              <input type="range" min="0.05" max="0.75" step="0.01" value="0.25" id="rngDelayTime" oninput="syncDspState()">
             </div>
-            <div class="macro-slider-group">
-              <label><span>Feedback</span><span id="txtDelayFb">35%</span></label>
-              <input type="range" min="0.0" max="0.6" step="0.01" value="0.35" id="slDelayFb" oninput="syncLiveDspNodes()">
-            </div>
-          </div>
-
-          <div class="fx-card">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
-              <span>🌌 Space Reverb</span>
-              <input type="checkbox" id="fxReverbCheck" onchange="syncLiveDspNodes()">
-            </div>
-            <div class="macro-slider-group">
-              <label><span>Decay</span><span id="txtRevDecay">1.8s</span></label>
-              <input type="range" min="0.5" max="4.0" step="0.1" value="1.8" id="slRevDecay" oninput="syncLiveDspNodes()">
-            </div>
-            <div class="macro-slider-group">
-              <label><span>Wet Mix</span><span id="txtRevMix">25%</span></label>
-              <input type="range" min="0.0" max="1.0" step="0.01" value="0.25" id="slRevMix" oninput="syncLiveDspNodes()">
+            <div class="slider-param">
+              <label><span>Feedback</span><span id="lblDelayFb">35%</span></label>
+              <input type="range" min="0.0" max="0.6" step="0.01" value="0.35" id="rngDelayFb" oninput="syncDspState()">
             </div>
           </div>
 
-          <div class="fx-card">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
-              <span>🎚️ Low-Pass</span>
-              <input type="checkbox" id="fxFilterCheck" onchange="syncLiveDspNodes()">
+          <div class="fx-slot">
+            <div class="slot-label-row">
+              <span>REVERB</span>
+              <input type="checkbox" id="chkReverb" onchange="syncDspState()">
             </div>
-            <div class="macro-slider-group">
-              <label><span>Cutoff</span><span id="txtCutoff">12kHz</span></label>
-              <input type="range" min="300" max="18000" step="100" value="12000" id="slCutoff" oninput="syncLiveDspNodes()">
+            <div class="slider-param">
+              <label><span>Decay</span><span id="lblRevDecay">1.8s</span></label>
+              <input type="range" min="0.5" max="4.0" step="0.1" value="1.8" id="rngRevDecay" oninput="syncDspState()">
+            </div>
+            <div class="slider-param">
+              <label><span>Wet Mix</span><span id="lblRevMix">25%</span></label>
+              <input type="range" min="0.0" max="1.0" step="0.01" value="0.25" id="rngRevMix" oninput="syncDspState()">
             </div>
           </div>
 
-          <div class="fx-card">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700;">
-              <span>🎵 Transpose</span>
-              <span id="txtPitchShift" style="color: var(--neon-cyan);">0 st</span>
+          <div class="fx-slot">
+            <div class="slot-label-row">
+              <span>LOW-PASS</span>
+              <input type="checkbox" id="chkFilter" onchange="syncDspState()">
             </div>
-            <div class="macro-slider-group">
-              <input type="range" min="-12" max="12" step="1" value="0" id="slPitchShift" oninput="syncLiveDspNodes()">
+            <div class="slider-param">
+              <label><span>Cutoff</span><span id="lblCutoff">12kHz</span></label>
+              <input type="range" min="300" max="18000" step="100" value="12000" id="rngCutoff" oninput="syncDspState()">
+            </div>
+          </div>
+
+          <div class="fx-slot">
+            <div class="slot-label-row">
+              <span>TRANSPOSE</span>
+              <span id="lblTranspose" style="color: var(--accent-cyan);">0 st</span>
+            </div>
+            <div class="slider-param">
+              <input type="range" min="-12" max="12" step="1" value="0" id="rngTranspose" oninput="syncDspState()">
             </div>
             <div style="display: flex; gap: 2px; margin-top: 2px;">
-              <button class="btn" style="flex:1; padding: 1px; font-size: 8px;" onclick="quickPitch(-12)">-1 Oct</button>
-              <button class="btn" style="flex:1; padding: 1px; font-size: 8px;" onclick="quickPitch(0)">Reset</button>
-              <button class="btn" style="flex:1; padding: 1px; font-size: 8px;" onclick="quickPitch(12)">+1 Oct</button>
+              <button class="btn" style="flex:1; padding: 1px; font-size: 8px;" onclick="setQuickPitch(-12)">-12</button>
+              <button class="btn" style="flex:1; padding: 1px; font-size: 8px;" onclick="setQuickPitch(0)">0</button>
+              <button class="btn" style="flex:1; padding: 1px; font-size: 8px;" onclick="setQuickPitch(12)">+12</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Sound Vault & Custom File Sample / Stem Importer -->
-      <div class="vault-panel">
-        <div class="rack-heading">
-          <span>🎯 Key Sound Vault: <strong style="color: var(--neon-cyan);" id="activeKeyTargetLabel">Key [Q]</strong></span>
-          <button class="btn btn-danger" style="padding: 1px 5px; font-size: 8.5px;" onclick="resetSelectedKey()">🗑️ Clear</button>
+      <!-- Sound Vault & File Loader -->
+      <div class="panel-box" style="flex: 1;">
+        <div class="panel-title">
+          <span>KEY SOUND VAULT: <strong style="color: var(--accent-cyan);" id="targetKeyHeader">KEY [Q]</strong></span>
+          <button class="btn btn-danger" style="padding: 1px 4px; font-size: 8px;" onclick="clearActiveTargetKey()">CLEAR</button>
         </div>
 
-        <!-- Custom Audio File / Remix Stem Loader -->
-        <div class="file-dropzone-box" onclick="document.getElementById('audioFileInput').click()">
-          <input type="file" id="audioFileInput" style="display:none;" accept="audio/*" onchange="handleAudioFileUpload(event)">
-          <div style="font-size: 14px;">📁 Load Custom Audio / Stem (MP3, WAV, FLAC, OGG)</div>
-          <div style="font-size: 8.5px; color: var(--text-dim); margin-top: 2px;">Preserves 100% audio quality • Remix full tracks or stems</div>
+        <div class="custom-file-upload-strip" onclick="document.getElementById('fileUploadPicker').click()">
+          <input type="file" id="fileUploadPicker" style="display:none;" accept="audio/*" onchange="loadCustomSampleFile(event)">
+          <span>+ LOAD AUDIO STEM (MP3, WAV, FLAC, OGG)</span>
         </div>
-        <div id="fileUploadFeedback" style="font-size: 9.5px; color: #ec4899; font-weight: 600;"></div>
+        <div id="fileUploadNotice" style="font-size: 8.5px; font-family: 'JetBrains Mono', monospace; color: var(--accent-emerald);"></div>
 
-        <div class="vault-grid">
-          <div class="vault-item" onclick="mapSoundToActiveKey('kick_808', '808 Kick', 'zone-drums')">🥁 808 Sub Kick</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('kick_punch', 'Punch Kick', 'zone-drums')">🥁 Punchy Kick</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('snare_trap', 'Trap Snare', 'zone-drums')">🥁 Trap Snare</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('snare_acoustic', 'Acoustic', 'zone-drums')">🥁 Acoustic Snare</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('hihat_cl', 'Cl. Hat', 'zone-drums')">🥁 Closed Hat</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('hihat_op', 'Op. Hat', 'zone-drums')">🥁 Open Hat</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('clap_909', '909 Clap', 'zone-drums')">👏 909 Clap</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('tom_low', 'Low Tom', 'zone-drums')">🥁 Low Tom</div>
+        <div class="sound-vault-grid">
+          <div class="vault-cell" onclick="bindSoundToKey('kick_808', '808 Kick', 'zone-drums')">808 Sub Kick</div>
+          <div class="vault-cell" onclick="bindSoundToKey('kick_punch', 'Punch Kick', 'zone-drums')">Punch Kick</div>
+          <div class="vault-cell" onclick="bindSoundToKey('snare_trap', 'Trap Snare', 'zone-drums')">Trap Snare</div>
+          <div class="vault-cell" onclick="bindSoundToKey('snare_acoustic', 'Acoustic', 'zone-drums')">Acoustic Snare</div>
+          <div class="vault-cell" onclick="bindSoundToKey('hihat_cl', 'Cl. Hat', 'zone-drums')">Closed Hat</div>
+          <div class="vault-cell" onclick="bindSoundToKey('hihat_op', 'Op. Hat', 'zone-drums')">Open Hat</div>
+          <div class="vault-cell" onclick="bindSoundToKey('clap_909', '909 Clap', 'zone-drums')">909 Clap</div>
+          <div class="vault-cell" onclick="bindSoundToKey('tom_low', 'Low Tom', 'zone-drums')">Low Tom</div>
+          <div class="vault-cell" onclick="bindSoundToKey('rimshot', 'Rimshot', 'zone-drums')">Rimshot</div>
+          <div class="vault-cell" onclick="bindSoundToKey('crash', 'Crash', 'zone-drums')">Crash</div>
 
-          <div class="vault-item" onclick="mapSoundToActiveKey('bass_808', 'Sub A1', 'zone-bass', 55)">🎸 808 Bass A1</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('bass_808', 'Sub C2', 'zone-bass', 65.4)">🎸 808 Bass C2</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('bass_808', 'Sub D2', 'zone-bass', 73.4)">🎸 808 Bass D2</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('bass_moog', 'Moog A1', 'zone-bass', 55)">🎸 Moog Saw Bass</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('bass_acid', 'Acid 303', 'zone-bass', 65.4)">🎸 Acid 303 Bass</div>
+          <div class="vault-cell" onclick="bindSoundToKey('bass_808', 'Sub A1', 'zone-bass', 55)">808 Bass A1</div>
+          <div class="vault-cell" onclick="bindSoundToKey('bass_808', 'Sub C2', 'zone-bass', 65.4)">808 Bass C2</div>
+          <div class="vault-cell" onclick="bindSoundToKey('bass_808', 'Sub D2', 'zone-bass', 73.4)">808 Bass D2</div>
+          <div class="vault-cell" onclick="bindSoundToKey('bass_moog', 'Moog Saw', 'zone-bass', 55)">Moog Saw</div>
+          <div class="vault-cell" onclick="bindSoundToKey('bass_acid', 'Acid 303', 'zone-bass', 65.4)">Acid 303</div>
 
-          <div class="vault-item" onclick="mapSoundToActiveKey('synth_pluck', 'Lead A4', 'zone-synth', 440)">🎹 Pluck Lead A4</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('synth_pluck', 'Lead C5', 'zone-synth', 523.25)">🎹 Pluck Lead C5</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('synth_pluck', 'Lead D5', 'zone-synth', 587.33)">🎹 Pluck Lead D5</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('synth_rhodes', 'Rhodes C4', 'zone-synth', 261.63)">🎹 Warm Rhodes</div>
-          <div class="vault-item" onclick="mapSoundToActiveKey('laser', 'Laser FX', 'zone-fx')">✨ Laser Sweep</div>
+          <div class="vault-cell" onclick="bindSoundToKey('synth_pluck', 'Lead A4', 'zone-synth', 440)">Lead A4</div>
+          <div class="vault-cell" onclick="bindSoundToKey('synth_pluck', 'Lead C5', 'zone-synth', 523.25)">Lead C5</div>
+          <div class="vault-cell" onclick="bindSoundToKey('synth_pluck', 'Lead D5', 'zone-synth', 587.33)">Lead D5</div>
+          <div class="vault-cell" onclick="bindSoundToKey('synth_rhodes', 'Rhodes C4', 'zone-synth', 261.63)">Warm Rhodes</div>
+          <div class="vault-cell" onclick="bindSoundToKey('laser', 'Laser FX', 'zone-fx')">Laser Sweep</div>
         </div>
 
-        <button class="btn btn-prometeo" style="justify-content: center; font-size: 10px;" onclick="auditionActiveKey()">▶ Audition Key Sound</button>
+        <button class="btn btn-prometeo" style="justify-content: center; font-size: 9.5px;" onclick="auditionCurrentTargetKey()">AUDITION KEY</button>
       </div>
     </div>
   </main>
 
   <!-- Footer -->
   <footer>
-    <div><span>🔥 <strong>K3N Armoni Composer</strong> • Live Loopstation, Stem Remixer & DSP Workstation</span></div>
-    <div><span>100% Offline Real-Time Audio Engine</span></div>
+    <div><span>K3N ARMONI COMPOSER • MULTI-DEVICE PRO AUDIO WORKSTATION</span></div>
+    <div><span>RAW INPUT LOW-LEVEL HOOK ACTIVE</span></div>
   </footer>
 
-  <!-- Web Audio Processing & Multi-Layer Looper Engine -->
+  <!-- Web Audio & Live Looper Script -->
   <script>
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
@@ -554,17 +589,63 @@
     let dspReverb = null;
     let dspReverbWet = null;
 
+    let masterBpm = 120;
+    let isMetronomeOn = true;
+    let metronomeInterval = null;
+
     function getAudioContext() {
       if (!audioCtx) {
         audioCtx = new AudioContext();
-        setupMasterDspChain();
-        initOscilloscope();
+        setupDspChain();
+        initCanvasScope();
+        startMetronomeTimer();
       }
       if (audioCtx.state === 'suspended') audioCtx.resume();
       return audioCtx;
     }
 
-    function setupMasterDspChain() {
+    // Metronome Click Synthesis
+    function playMetronomeTick(isDownbeat) {
+      if (!isMetronomeOn) return;
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.frequency.setValueAtTime(isDownbeat ? 1400 : 900, now);
+      g.gain.setValueAtTime(isDownbeat ? 0.25 : 0.08, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.04);
+
+      const led = document.getElementById('metroLed');
+      if (led) {
+        led.classList.add('flash');
+        setTimeout(() => led.classList.remove('flash'), 70);
+      }
+    }
+
+    function startMetronomeTimer() {
+      if (metronomeInterval) clearInterval(metronomeInterval);
+      let step = 0;
+      const intervalMs = 60000 / masterBpm;
+      metronomeInterval = setInterval(() => {
+        playMetronomeTick(step === 0);
+        step = (step + 1) % 4;
+      }, intervalMs);
+    }
+
+    function toggleMetronomeAudio() {
+      isMetronomeOn = !isMetronomeOn;
+      document.getElementById('metroTxt').innerText = isMetronomeOn ? 'ON' : 'OFF';
+      if (isMetronomeOn) startMetronomeTimer();
+    }
+
+    function changeBpm() {
+      masterBpm = parseInt(document.getElementById('bpmInputVal').value) || 120;
+      if (isMetronomeOn) startMetronomeTimer();
+    }
+
+    function setupDspChain() {
       const ctx = audioCtx;
       analyserNode = ctx.createAnalyser();
       analyserNode.fftSize = 256;
@@ -590,7 +671,7 @@
       dspReverb = ctx.createConvolver();
       dspReverbWet = ctx.createGain();
       dspReverbWet.gain.setValueAtTime(0.0, ctx.currentTime);
-      createReverbImpulse(1.8);
+      createReverbBuffer(1.8);
       dspReverb.connect(dspReverbWet);
       dspReverbWet.connect(analyserNode);
 
@@ -598,7 +679,7 @@
       analyserNode.connect(ctx.destination);
     }
 
-    function createReverbImpulse(dur) {
+    function createReverbBuffer(dur) {
       if (!audioCtx) return;
       const rate = audioCtx.sampleRate;
       const len = Math.floor(rate * dur);
@@ -612,30 +693,28 @@
       dspReverb.buffer = buf;
     }
 
-    function initOscilloscope() {
+    function initCanvasScope() {
       const canvas = document.getElementById('scopeCanvas');
       const canvasCtx = canvas.getContext('2d');
-      const bufferLength = analyserNode.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
+      const bufferLen = analyserNode.frequencyBinCount;
+      const dataArr = new Uint8Array(bufferLen);
 
-      function draw() {
-        requestAnimationFrame(draw);
-        analyserNode.getByteTimeDomainData(dataArray);
+      function renderScope() {
+        requestAnimationFrame(renderScope);
+        analyserNode.getByteTimeDomainData(dataArr);
 
         canvasCtx.fillStyle = '#020305';
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-        canvasCtx.lineWidth = 2;
-        canvasCtx.strokeStyle = '#00f2fe';
-        canvasCtx.shadowBlur = 6;
-        canvasCtx.shadowColor = '#00f2fe';
+        canvasCtx.lineWidth = 1.5;
+        canvasCtx.strokeStyle = '#06b6d4';
 
         canvasCtx.beginPath();
-        const sliceWidth = canvas.width / bufferLength;
+        const sliceWidth = canvas.width / bufferLen;
         let x = 0;
 
-        for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
+        for (let i = 0; i < bufferLen; i++) {
+          const v = dataArr[i] / 128.0;
           const y = (v * canvas.height) / 2;
           if (i === 0) canvasCtx.moveTo(x, y);
           else canvasCtx.lineTo(x, y);
@@ -645,39 +724,35 @@
         canvasCtx.lineTo(canvas.width, canvas.height / 2);
         canvasCtx.stroke();
       }
-      draw();
+      renderScope();
     }
 
-    let globalTranspose = 0;
-    const loadedCustomBuffers = {}; // Custom loaded audio files
+    let globalPitchSemitones = 0;
+    const customSampleBank = {};
 
-    function renderSound(soundId, freq = 440, vol = 1.0, fxConfig = { echo: true, reverb: true, filter: true }) {
+    function triggerAudioNode(soundId, freq = 440, vol = 1.0, fxRoutes = { echo: true, reverb: true, filter: true }) {
       const ctx = getAudioContext();
       const now = ctx.currentTime;
-      const finalFreq = freq * Math.pow(2, globalTranspose / 12);
+      const noteFreq = freq * Math.pow(2, globalPitchSemitones / 12);
 
       const out = ctx.createGain();
-      out.gain.setValueAtTime(vol * 0.9, now);
+      out.gain.setValueAtTime(vol * 0.85, now);
 
-      if (fxConfig.filter) {
-        out.connect(dspFilter);
-      } else {
-        out.connect(analyserNode);
-      }
+      if (fxRoutes.filter) out.connect(dspFilter);
+      else out.connect(analyserNode);
 
-      if (fxConfig.echo && document.getElementById('fxDelayCheck').checked && dspDelayWet) out.connect(dspDelay);
-      if (fxConfig.reverb && document.getElementById('fxReverbCheck').checked && dspReverbWet) out.connect(dspReverb);
+      if (fxRoutes.echo && document.getElementById('chkDelay').checked && dspDelayWet) out.connect(dspDelay);
+      if (fxRoutes.reverb && document.getElementById('chkReverb').checked && dspReverbWet) out.connect(dspReverb);
 
-      // Play custom user sample if present
-      if (soundId.startsWith('custom_') && loadedCustomBuffers[soundId]) {
+      // Custom file sample
+      if (soundId.startsWith('user_') && customSampleBank[soundId]) {
         const src = ctx.createBufferSource();
-        src.buffer = loadedCustomBuffers[soundId];
+        src.buffer = customSampleBank[soundId];
         src.connect(out);
         src.start(now);
         return;
       }
 
-      // Procedural synthesizers
       if (soundId === 'kick_808') {
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
@@ -807,7 +882,7 @@
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
         osc.type = "sine";
-        osc.frequency.setValueAtTime(finalFreq, now);
+        osc.frequency.setValueAtTime(noteFreq, now);
         g.gain.setValueAtTime(0.9, now);
         g.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
         osc.connect(g); g.connect(out);
@@ -816,7 +891,7 @@
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
         osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(finalFreq, now);
+        osc.frequency.setValueAtTime(noteFreq, now);
         const lp = ctx.createBiquadFilter();
         lp.type = "lowpass"; lp.frequency.setValueAtTime(600, now); lp.Q.setValueAtTime(4.0, now);
         g.gain.setValueAtTime(0.75, now);
@@ -827,7 +902,7 @@
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
         osc.type = "square";
-        osc.frequency.setValueAtTime(finalFreq, now);
+        osc.frequency.setValueAtTime(noteFreq, now);
         const lp = ctx.createBiquadFilter();
         lp.type = "lowpass";
         lp.frequency.setValueAtTime(1400, now);
@@ -841,7 +916,7 @@
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
         osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(finalFreq, now);
+        osc.frequency.setValueAtTime(noteFreq, now);
         const lp = ctx.createBiquadFilter();
         lp.type = "lowpass";
         lp.frequency.setValueAtTime(3400, now);
@@ -854,8 +929,8 @@
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const g = ctx.createGain();
-        osc1.type = "sine"; osc1.frequency.setValueAtTime(finalFreq, now);
-        osc2.type = "triangle"; osc2.frequency.setValueAtTime(finalFreq * 2, now);
+        osc1.type = "sine"; osc1.frequency.setValueAtTime(noteFreq, now);
+        osc2.type = "triangle"; osc2.frequency.setValueAtTime(noteFreq * 2, now);
         g.gain.setValueAtTime(0.6, now);
         g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
         osc1.connect(g); osc2.connect(g); g.connect(out);
@@ -873,12 +948,12 @@
       }
     }
 
-    // Dynamic Sound Database
-    let activeKeyDatabase = {
+    // Dynamic Key Sound Matrix
+    let activeKeyMatrix = {
       '1': { sound: 'kick_808', label: 'Kick', zone: 'zone-drums' },
       '2': { sound: 'snare_trap', label: 'Snare', zone: 'zone-drums' },
-      '3': { sound: 'hihat_cl', label: 'Cl.Hat', zone: 'zone-drums' },
-      '4': { sound: 'bass_808', label: 'Sub808', zone: 'zone-bass', freq: 55 },
+      '3': { sound: 'hihat_cl', label: 'Hat', zone: 'zone-drums' },
+      '4': { sound: 'bass_808', label: '808', zone: 'zone-bass', freq: 55 },
       '5': { sound: 'synth_pluck', label: 'Lead', zone: 'zone-synth', freq: 440 },
       'q': { sound: 'kick_808', label: '808 Kick', zone: 'zone-drums' },
       'w': { sound: 'snare_trap', label: 'Snare', zone: 'zone-drums' },
@@ -900,49 +975,49 @@
       'v': { sound: 'synth_pluck', label: 'Lead E5', zone: 'zone-synth', freq: 659.25 },
       'b': { sound: 'synth_pluck', label: 'Lead G5', zone: 'zone-synth', freq: 783.99 },
       'n': { sound: 'synth_pluck', label: 'Lead A5', zone: 'zone-synth', freq: 880.0 },
-      ' ': { sound: 'laser', label: '✨ Laser FX', zone: 'zone-fx' }
+      ' ': { sound: 'laser', label: 'Laser FX', zone: 'zone-fx' }
     };
 
     let selectedKeyTarget = 'q';
 
-    function selectKeyToInspect(key) {
-      selectedKeyTarget = key;
-      document.getElementById('activeKeyTargetLabel').innerText = `Key [${key.toUpperCase()}]`;
-      document.querySelectorAll('.key-cap').forEach(c => c.classList.remove('selected-target'));
-      const cap = document.getElementById(`key-${key}`);
-      if (cap) cap.classList.add('selected-target');
-      auditionActiveKey();
+    function pickKeyToInspect(k) {
+      selectedKeyTarget = k;
+      document.getElementById('targetKeyHeader').innerText = `KEY [${k.toUpperCase()}]`;
+      document.querySelectorAll('.key-unit').forEach(el => el.classList.remove('selected-key'));
+      const cap = document.getElementById(`key-${k}`);
+      if (cap) cap.classList.add('selected-key');
+      auditionCurrentTargetKey();
     }
 
-    function mapSoundToActiveKey(sound, label, zone, freq = 440) {
-      activeKeyDatabase[selectedKeyTarget] = { sound, label, zone, freq };
+    function bindSoundToKey(sound, label, zone, freq = 440) {
+      activeKeyMatrix[selectedKeyTarget] = { sound, label, zone, freq };
       const cap = document.getElementById(`key-${selectedKeyTarget}`);
       if (cap) {
-        cap.className = `key-cap ${zone} selected-target`;
+        cap.className = `key-unit ${zone} selected-key`;
         if (selectedKeyTarget === ' ') cap.className += ' w-space';
-        cap.innerHTML = `${selectedKeyTarget.toUpperCase()}<span class="sub-label">${label}</span>`;
+        cap.innerHTML = `${selectedKeyTarget.toUpperCase()}<span class="key-subtext">${label}</span>`;
       }
-      auditionActiveKey();
+      auditionCurrentTargetKey();
     }
 
-    function resetSelectedKey() {
-      delete activeKeyDatabase[selectedKeyTarget];
+    function clearActiveTargetKey() {
+      delete activeKeyMatrix[selectedKeyTarget];
       const cap = document.getElementById(`key-${selectedKeyTarget}`);
       if (cap) {
-        cap.className = `key-cap selected-target`;
+        cap.className = `key-unit selected-key`;
         if (selectedKeyTarget === ' ') cap.className += ' w-space';
         cap.innerHTML = `${selectedKeyTarget.toUpperCase()}`;
       }
     }
 
-    function auditionActiveKey() {
-      if (activeKeyDatabase[selectedKeyTarget]) {
-        const item = activeKeyDatabase[selectedKeyTarget];
-        renderSound(item.sound, item.freq || 440);
+    function auditionCurrentTargetKey() {
+      if (activeKeyMatrix[selectedKeyTarget]) {
+        const item = activeKeyMatrix[selectedKeyTarget];
+        triggerAudioNode(item.sound, item.freq || 440);
       }
     }
 
-    function handleAudioFileUpload(e) {
+    function loadCustomSampleFile(e) {
       const file = e.target.files[0];
       if (!file) return;
 
@@ -952,40 +1027,40 @@
         const ctx = getAudioContext();
         try {
           const decodedBuf = await ctx.decodeAudioData(arrayBuf);
-          const customId = 'custom_' + Date.now();
-          loadedCustomBuffers[customId] = decodedBuf;
+          const sampleId = 'user_' + Date.now();
+          customSampleBank[sampleId] = decodedBuf;
           
-          mapSoundToActiveKey(customId, file.name.substring(0, 8), 'zone-custom');
-          document.getElementById('fileUploadFeedback').innerText = `✅ Sample "${file.name}" mapped with lossless quality to Key [${selectedKeyTarget.toUpperCase()}]!`;
+          bindSoundToKey(sampleId, file.name.substring(0, 7), 'zone-fx');
+          document.getElementById('fileUploadNotice').innerText = `[OK] "${file.name}" mapped to KEY [${selectedKeyTarget.toUpperCase()}]!`;
         } catch (err) {
-          alert("Error decoding audio file: " + err.message);
+          alert("Error decoding file: " + err.message);
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function livePhysicalTrigger(keyChar) {
+    function handleLiveKeyTrigger(keyChar) {
       const k = keyChar.toLowerCase();
       const cap = document.getElementById(`key-${k}`);
       if (cap) {
         cap.classList.add('active');
-        setTimeout(() => cap.classList.remove('active'), 80);
+        setTimeout(() => cap.classList.remove('active'), 70);
       }
 
-      if (activeKeyDatabase[k]) {
-        const item = activeKeyDatabase[k];
-        renderSound(item.sound, item.freq || 440);
+      if (activeKeyMatrix[k]) {
+        const item = activeKeyMatrix[k];
+        triggerAudioNode(item.sound, item.freq || 440);
 
         const nowMs = Date.now();
-        masterLoopLayers.forEach((layer, lIdx) => {
+        masterTrackLayers.forEach((layer, lIdx) => {
           if (layer.state === 'rec') {
             const offset = nowMs - layer.recStart;
             layer.events.push({ key: k, sound: item.sound, freq: item.freq || 440, offset });
-            drawTimelineDot(lIdx, offset, layer.estDuration || 3500);
+            drawWaveDot(lIdx, offset, layer.estDuration || 3500);
           } else if (layer.state === 'dub') {
             const offset = (nowMs - layer.loopStart) % layer.duration;
             layer.events.push({ key: k, sound: item.sound, freq: item.freq || 440, offset });
-            drawTimelineDot(lIdx, offset, layer.duration);
+            drawWaveDot(lIdx, offset, layer.duration);
           }
         });
       }
@@ -993,138 +1068,139 @@
 
     window.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
-      if (activeKeyDatabase[k]) {
+      if (activeKeyMatrix[k]) {
         e.preventDefault();
-        livePhysicalTrigger(k);
+        handleLiveKeyTrigger(k);
       }
     });
 
-    function switchHardwareDeck(deckId) {
-      document.querySelectorAll('.deck-tab-btn').forEach(b => b.classList.remove('active'));
+    // Deck Switcher Profile Manager
+    function selectDeckProfile(deckId) {
+      document.querySelectorAll('.deck-btn').forEach(b => b.classList.remove('active'));
       event.currentTarget.classList.add('active');
-      const titleEl = document.getElementById('deckHeaderTitle');
+      const title = document.getElementById('deckRigTitle');
 
       if (deckId === 'split') {
-        titleEl.innerHTML = `<span>⚡ Unified Split Deck (Keyboard #1)</span>`;
+        title.innerText = "ACTIVE DECK: UNIFIED MULTI-ZONE RIG (1 KEYBOARD)";
       } else if (deckId === 'deck_drums') {
-        titleEl.innerHTML = `<span>🥁 Deck A: USB Keyboard #1 (Dedicated Drums & Percussion Rig)</span>`;
+        title.innerText = "ACTIVE DECK 1: DEDICATED DRUMS & PERCUSSION MATRIX (USB KEYBOARD #1)";
       } else if (deckId === 'deck_bass') {
-        titleEl.innerHTML = `<span>🎸 Deck B: USB Keyboard #2 (Dedicated 808 Sub Station)</span>`;
+        title.innerText = "ACTIVE DECK 2: DEDICATED 808 SUB BASS STATION (USB KEYBOARD #2)";
       } else if (deckId === 'deck_synth') {
-        titleEl.innerHTML = `<span>🎹 Deck C: USB Keyboard #3 (Dedicated Polyphonic Lead Synth)</span>`;
+        title.innerText = "ACTIVE DECK 3: DEDICATED POLYPHONIC LEAD SYNTH (USB KEYBOARD #3)";
       }
     }
 
-    // Live Multi-Layer LoopStation
+    // Live Multi-Track Hardware Looper
     let masterPhraseDuration = null;
 
-    let masterLoopLayers = [
-      { id: 0, name: "Layer 1 (Drums Master)", state: 'idle', events: [], duration: 0, vol: 1.0, muted: false, fx: { echo: true, reverb: false, filter: true }, recStart: 0, loopStart: 0, timer: null },
-      { id: 1, name: "Layer 2 (808 Bassline)", state: 'idle', events: [], duration: 0, vol: 0.9, muted: false, fx: { echo: false, reverb: false, filter: true }, recStart: 0, loopStart: 0, timer: null },
-      { id: 2, name: "Layer 3 (Melodic Lead)", state: 'idle', events: [], duration: 0, vol: 0.85, muted: false, fx: { echo: true, reverb: true, filter: true }, recStart: 0, loopStart: 0, timer: null }
+    let masterTrackLayers = [
+      { id: 0, name: "LAYER 1 (DRUMS)", state: 'idle', events: [], duration: 0, vol: 1.0, muted: false, fx: { echo: true, reverb: false, filter: true }, recStart: 0, loopStart: 0, timer: null },
+      { id: 1, name: "LAYER 2 (808 BASS)", state: 'idle', events: [], duration: 0, vol: 0.9, muted: false, fx: { echo: false, reverb: false, filter: true }, recStart: 0, loopStart: 0, timer: null },
+      { id: 2, name: "LAYER 3 (LEAD SYNTH)", state: 'idle', events: [], duration: 0, vol: 0.85, muted: false, fx: { echo: true, reverb: true, filter: true }, recStart: 0, loopStart: 0, timer: null }
     ];
 
-    function renderLoopStrips() {
-      const wrap = document.getElementById('loopStripsWrap');
-      wrap.innerHTML = '';
+    function renderTrackStrips() {
+      const container = document.getElementById('trackStripsContainer');
+      container.innerHTML = '';
 
-      masterLoopLayers.forEach((layer, idx) => {
+      masterTrackLayers.forEach((layer, idx) => {
         const strip = document.createElement('div');
-        strip.className = `loop-strip state-${layer.state}`;
-        strip.id = `loop-strip-${idx}`;
+        strip.className = `layer-strip state-${layer.state}`;
+        strip.id = `layer-strip-${idx}`;
 
-        let statusTag = `<span class="strip-status status-empty">EMPTY</span>`;
-        let btnLabel = "● RECORD";
-        let btnCls = "trigger-idle";
+        let badgeTag = `<span class="layer-badge badge-empty">EMPTY</span>`;
+        let btnLabel = "RECORD";
+        let btnCls = "act-idle";
 
         if (layer.state === 'rec') {
-          statusTag = `<span class="strip-status status-rec">● RECORDING</span>`;
-          btnLabel = "▶ PLAY LOOP";
-          btnCls = "trigger-rec";
+          badgeTag = `<span class="layer-badge badge-rec">RECORDING</span>`;
+          btnLabel = "PLAY LOOP";
+          btnCls = "act-rec";
         } else if (layer.state === 'play') {
-          statusTag = `<span class="strip-status status-play">▶ PLAYING</span>`;
-          btnLabel = "➕ OVERDUB";
-          btnCls = "trigger-play";
+          badgeTag = `<span class="layer-badge badge-play">PLAYING</span>`;
+          btnLabel = "OVERDUB";
+          btnCls = "act-play";
         } else if (layer.state === 'dub') {
-          statusTag = `<span class="strip-status status-dub">● DUBBING</span>`;
-          btnLabel = "▶ LOCK LOOP";
-          btnCls = "trigger-dub";
+          badgeTag = `<span class="layer-badge badge-dub">DUBBING</span>`;
+          btnLabel = "LOCK LOOP";
+          btnCls = "act-dub";
         }
 
         strip.innerHTML = `
-          <div class="strip-meta">
-            <div class="strip-name">${layer.name}</div>
-            ${statusTag}
+          <div class="layer-id-box">
+            <div class="layer-name">${layer.name}</div>
+            ${badgeTag}
           </div>
 
-          <button class="btn-loop-trigger ${btnCls}" onclick="onLoopAction(${idx})">
+          <button class="btn-loop-action ${btnCls}" onclick="onTrackActionClick(${idx})">
             ${btnLabel}
           </button>
 
-          <div class="loop-wave-box" id="wavebox-${idx}">
-            <div class="playhead-scanner" id="playhead-${idx}"></div>
-            <div class="hit-dots-wrap" id="dots-${idx}"></div>
+          <div class="layer-wave-view" id="layerwave-${idx}">
+            <div class="playhead-needle" id="playhead-${idx}"></div>
+            <div class="layer-dots-plane" id="dotsplane-${idx}"></div>
           </div>
 
-          <div class="strip-fx-toggles">
-            <span class="fx-toggle-pill ${layer.fx.echo?'active':''}" onclick="toggleLayerFx(${idx}, 'echo')">Echo</span>
-            <span class="fx-toggle-pill ${layer.fx.reverb?'active':''}" onclick="toggleLayerFx(${idx}, 'reverb')">Rev</span>
-            <span class="fx-toggle-pill ${layer.fx.filter?'active':''}" onclick="toggleLayerFx(${idx}, 'filter')">Filt</span>
+          <div class="layer-fx-bar">
+            <span class="fx-pill ${layer.fx.echo?'active':''}" onclick="toggleLayerFxInsert(${idx}, 'echo')">Echo</span>
+            <span class="fx-pill ${layer.fx.reverb?'active':''}" onclick="toggleLayerFxInsert(${idx}, 'reverb')">Rev</span>
+            <span class="fx-pill ${layer.fx.filter?'active':''}" onclick="toggleLayerFxInsert(${idx}, 'filter')">Filt</span>
           </div>
 
-          <div class="strip-mix">
-            <div class="vol-slider-wrap">
+          <div class="layer-controls">
+            <div class="layer-fader">
               <span>VOL</span>
-              <input type="range" min="0" max="1" step="0.05" value="${layer.vol}" oninput="setLayerVolume(${idx}, this.value)">
+              <input type="range" min="0" max="1" step="0.05" value="${layer.vol}" oninput="setLayerFader(${idx}, this.value)">
             </div>
-            <button class="btn ${layer.muted?'btn-mute active':''}" style="padding: 2px 6px; font-size: 9.5px;" onclick="toggleMuteLayer(${idx})">M</button>
-            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9.5px;" onclick="clearLayer(${idx})">✕</button>
+            <button class="btn ${layer.muted?'active':''}" style="padding: 2px 5px; font-size: 8.5px;" onclick="toggleLayerMute(${idx})">M</button>
+            <button class="btn btn-danger" style="padding: 2px 5px; font-size: 8.5px;" onclick="clearLayerTrack(${idx})">X</button>
           </div>
         `;
 
-        wrap.appendChild(strip);
-        rebuildTimelineDots(idx);
+        container.appendChild(strip);
+        rebuildWaveDots(idx);
       });
     }
 
-    function toggleLayerFx(lIdx, fxName) {
-      masterLoopLayers[lIdx].fx[fxName] = !masterLoopLayers[lIdx].fx[fxName];
-      renderLoopStrips();
+    function toggleLayerFxInsert(lIdx, fxName) {
+      masterTrackLayers[lIdx].fx[fxName] = !masterTrackLayers[lIdx].fx[fxName];
+      renderTrackStrips();
     }
 
-    function onLoopAction(idx) {
+    function onTrackActionClick(idx) {
       getAudioContext();
-      const layer = masterLoopLayers[idx];
+      const layer = masterTrackLayers[idx];
 
       if (layer.state === 'idle') {
         layer.state = 'rec';
         layer.events = [];
         layer.recStart = Date.now();
-        document.getElementById(`dots-${idx}`).innerHTML = '';
-        renderLoopStrips();
+        document.getElementById(`dotsplane-${idx}`).innerHTML = '';
+        renderTrackStrips();
       } else if (layer.state === 'rec') {
-        const recordedDur = Date.now() - layer.recStart;
+        const recDur = Date.now() - layer.recStart;
         if (!masterPhraseDuration) {
-          masterPhraseDuration = Math.max(1000, recordedDur);
+          masterPhraseDuration = Math.max(800, recDur);
           layer.duration = masterPhraseDuration;
         } else {
           layer.duration = masterPhraseDuration;
         }
         layer.state = 'play';
         layer.loopStart = Date.now();
-        startLayerPlayback(idx);
-        renderLoopStrips();
+        startLayerPlaybackLoop(idx);
+        renderTrackStrips();
       } else if (layer.state === 'play') {
         layer.state = 'dub';
-        renderLoopStrips();
+        renderTrackStrips();
       } else if (layer.state === 'dub') {
         layer.state = 'play';
-        renderLoopStrips();
+        renderTrackStrips();
       }
     }
 
-    function startLayerPlayback(idx) {
-      const layer = masterLoopLayers[idx];
+    function startLayerPlaybackLoop(idx) {
+      const layer = masterTrackLayers[idx];
       if (layer.timer) clearInterval(layer.timer);
 
       const playhead = document.getElementById(`playhead-${idx}`);
@@ -1134,11 +1210,11 @@
         layer.events.forEach(ev => {
           setTimeout(() => {
             if ((layer.state === 'play' || layer.state === 'dub') && !layer.muted) {
-              renderSound(ev.sound, ev.freq, layer.vol, layer.fx);
+              triggerAudioNode(ev.sound, ev.freq, layer.vol, layer.fx);
               const cap = document.getElementById(`key-${ev.key}`);
               if (cap) {
                 cap.classList.add('active');
-                setTimeout(() => cap.classList.remove('active'), 80);
+                setTimeout(() => cap.classList.remove('active'), 70);
               }
             }
           }, ev.offset);
@@ -1149,60 +1225,60 @@
       playCycle();
       layer.timer = setInterval(playCycle, layer.duration);
 
-      function animate() {
+      function runPlayhead() {
         if (layer.state === 'play' || layer.state === 'dub') {
           const elapsed = (Date.now() - layer.loopStart) % layer.duration;
           const pct = (elapsed / layer.duration) * 100;
           if (playhead) playhead.style.left = `${pct}%`;
-          requestAnimationFrame(animate);
+          requestAnimationFrame(runPlayhead);
         }
       }
-      requestAnimationFrame(animate);
+      requestAnimationFrame(runPlayhead);
     }
 
-    function drawTimelineDot(idx, offset, totalDur) {
-      const container = document.getElementById(`dots-${idx}`);
-      if (!container) return;
+    function drawWaveDot(idx, offset, totalDur) {
+      const plane = document.getElementById(`dotsplane-${idx}`);
+      if (!plane) return;
       const dot = document.createElement('div');
-      dot.className = 'hit-marker';
-      dot.style.backgroundColor = 'var(--neon-cyan)';
-      dot.style.color = 'var(--neon-cyan)';
+      dot.className = 'hit-dot';
+      dot.style.backgroundColor = 'var(--accent-cyan)';
+      dot.style.color = 'var(--accent-cyan)';
       const pct = Math.min(100, Math.max(0, (offset / totalDur) * 100));
       dot.style.left = `${pct}%`;
-      container.appendChild(dot);
+      plane.appendChild(dot);
     }
 
-    function rebuildTimelineDots(idx) {
-      const layer = masterLoopLayers[idx];
-      const container = document.getElementById(`dots-${idx}`);
-      if (!container || !layer.duration) return;
-      container.innerHTML = '';
+    function rebuildWaveDots(idx) {
+      const layer = masterTrackLayers[idx];
+      const plane = document.getElementById(`dotsplane-${idx}`);
+      if (!plane || !layer.duration) return;
+      plane.innerHTML = '';
       layer.events.forEach(ev => {
-        drawTimelineDot(idx, ev.offset, layer.duration);
+        drawWaveDot(idx, ev.offset, layer.duration);
       });
     }
 
-    function setLayerVolume(idx, v) { masterLoopLayers[idx].vol = parseFloat(v); }
+    function setLayerFader(idx, v) { masterTrackLayers[idx].vol = parseFloat(v); }
 
-    function toggleMuteLayer(idx) {
-      masterLoopLayers[idx].muted = !masterLoopLayers[idx].muted;
-      renderLoopStrips();
+    function toggleLayerMute(idx) {
+      masterTrackLayers[idx].muted = !masterTrackLayers[idx].muted;
+      renderTrackStrips();
     }
 
-    function clearLayer(idx) {
-      const layer = masterLoopLayers[idx];
+    function clearLayerTrack(idx) {
+      const layer = masterTrackLayers[idx];
       layer.state = 'idle';
       layer.events = [];
       layer.duration = 0;
       if (layer.timer) clearInterval(layer.timer);
-      renderLoopStrips();
+      renderTrackStrips();
     }
 
-    function addNewLoopLayer() {
-      const newId = masterLoopLayers.length;
-      masterLoopLayers.push({
+    function addNewLayerTrack() {
+      const newId = masterTrackLayers.length;
+      masterTrackLayers.push({
         id: newId,
-        name: `Layer ${newId + 1} (Live Overdub)`,
+        name: `LAYER ${newId + 1}`,
         state: 'idle',
         events: [],
         duration: 0,
@@ -1213,82 +1289,82 @@
         loopStart: 0,
         timer: null
       });
-      renderLoopStrips();
+      renderTrackStrips();
     }
 
     function stopAllPlayback() {
-      masterLoopLayers.forEach(l => {
+      masterTrackLayers.forEach(l => {
         if (l.state === 'play' || l.state === 'dub') {
           l.state = 'idle';
           if (l.timer) clearInterval(l.timer);
         }
       });
-      renderLoopStrips();
+      renderTrackStrips();
     }
 
     function resetMasterStation() {
       masterPhraseDuration = null;
-      masterLoopLayers.forEach((_, idx) => clearLayer(idx));
+      masterTrackLayers.forEach((_, idx) => clearLayerTrack(idx));
     }
 
-    function syncLiveDspNodes() {
+    function syncDspState() {
       getAudioContext();
-      const delayTime = parseFloat(document.getElementById('slDelayTime').value);
-      const delayFb = parseFloat(document.getElementById('slDelayFb').value);
-      const revDecay = parseFloat(document.getElementById('slRevDecay').value);
-      const revMix = parseFloat(document.getElementById('slRevMix').value);
-      const cutoff = parseFloat(document.getElementById('slCutoff').value);
-      const pitch = parseInt(document.getElementById('slPitchShift').value);
+      const delayTime = parseFloat(document.getElementById('rngDelayTime').value);
+      const delayFb = parseFloat(document.getElementById('rngDelayFb').value);
+      const revDecay = parseFloat(document.getElementById('rngRevDecay').value);
+      const revMix = parseFloat(document.getElementById('rngRevMix').value);
+      const cutoff = parseFloat(document.getElementById('rngCutoff').value);
+      const pitch = parseInt(document.getElementById('rngTranspose').value);
 
-      document.getElementById('txtDelayTime').innerText = delayTime.toFixed(2) + 's';
-      document.getElementById('txtDelayFb').innerText = Math.round(delayFb * 100) + '%';
-      document.getElementById('txtRevDecay').innerText = revDecay.toFixed(1) + 's';
-      document.getElementById('txtRevMix').innerText = Math.round(revMix * 100) + '%';
-      document.getElementById('txtCutoff').innerText = Math.round(cutoff / 1000) + 'kHz';
-      document.getElementById('txtPitchShift').innerText = (pitch > 0 ? '+' : '') + pitch + ' st';
+      document.getElementById('lblDelayTime').innerText = delayTime.toFixed(2) + 's';
+      document.getElementById('lblDelayFb').innerText = Math.round(delayFb * 100) + '%';
+      document.getElementById('lblRevDecay').innerText = revDecay.toFixed(1) + 's';
+      document.getElementById('lblRevMix').innerText = Math.round(revMix * 100) + '%';
+      document.getElementById('lblCutoff').innerText = Math.round(cutoff / 1000) + 'kHz';
+      document.getElementById('lblTranspose').innerText = (pitch > 0 ? '+' : '') + pitch + ' st';
 
-      globalTranspose = pitch;
+      globalPitchSemitones = pitch;
 
       if (dspFilter) {
-        dspFilter.frequency.setValueAtTime(document.getElementById('fxFilterCheck').checked ? cutoff : 20000, audioCtx.currentTime);
+        dspFilter.frequency.setValueAtTime(document.getElementById('chkFilter').checked ? cutoff : 20000, audioCtx.currentTime);
       }
       if (dspDelay) dspDelay.delayTime.setValueAtTime(delayTime, audioCtx.currentTime);
-      if (dspDelayFb) dspDelayFb.gain.setValueAtTime(document.getElementById('fxDelayCheck').checked ? delayFb : 0, audioCtx.currentTime);
-      if (dspDelayWet) dspDelayWet.gain.setValueAtTime(document.getElementById('fxDelayCheck').checked ? 0.35 : 0, audioCtx.currentTime);
-      if (dspReverbWet) dspReverbWet.gain.setValueAtTime(document.getElementById('fxReverbCheck').checked ? revMix : 0, audioCtx.currentTime);
+      if (dspDelayFb) dspDelayFb.gain.setValueAtTime(document.getElementById('chkDelay').checked ? delayFb : 0, audioCtx.currentTime);
+      if (dspDelayWet) dspDelayWet.gain.setValueAtTime(document.getElementById('chkDelay').checked ? 0.35 : 0, audioCtx.currentTime);
+      if (dspReverbWet) dspReverbWet.gain.setValueAtTime(document.getElementById('chkReverb').checked ? revMix : 0, audioCtx.currentTime);
     }
 
-    function quickPitch(val) {
-      document.getElementById('slPitchShift').value = val;
-      syncLiveDspNodes();
+    function setQuickPitch(val) {
+      document.getElementById('rngTranspose').value = val;
+      syncDspState();
     }
 
-    function loadQuickPreset(name) {
-      if (name === 'trap') {
-        activeKeyDatabase['q'] = { sound: 'kick_808', label: '808 Kick', zone: 'zone-drums' };
-        activeKeyDatabase['w'] = { sound: 'snare_trap', label: 'Trap Snare', zone: 'zone-drums' };
-        activeKeyDatabase['a'] = { sound: 'bass_808', label: 'Sub A1', zone: 'zone-bass', freq: 55 };
-      } else if (name === 'synthwave') {
-        activeKeyDatabase['q'] = { sound: 'kick_punch', label: 'Punch Kick', zone: 'zone-drums' };
-        activeKeyDatabase['w'] = { sound: 'clap_909', label: '909 Clap', zone: 'zone-drums' };
-        activeKeyDatabase['a'] = { sound: 'bass_moog', label: 'Moog Saw', zone: 'zone-bass', freq: 110 };
-      } else if (name === 'lofi') {
-        activeKeyDatabase['q'] = { sound: 'kick_punch', label: 'Warm Kick', zone: 'zone-drums' };
-        activeKeyDatabase['w'] = { sound: 'snare_acoustic', label: 'Wood Snare', zone: 'zone-drums' };
-        activeKeyDatabase['a'] = { sound: 'synth_rhodes', label: 'Rhodes C4', zone: 'zone-bass', freq: 261.63 };
+    function loadRigPreset(preset) {
+      if (preset === 'trap') {
+        activeKeyMatrix['q'] = { sound: 'kick_808', label: '808 Kick', zone: 'zone-drums' };
+        activeKeyMatrix['w'] = { sound: 'snare_trap', label: 'Trap Snare', zone: 'zone-drums' };
+        activeKeyMatrix['a'] = { sound: 'bass_808', label: 'Sub A1', zone: 'zone-bass', freq: 55 };
+      } else if (preset === 'synthwave') {
+        activeKeyMatrix['q'] = { sound: 'kick_punch', label: 'Punch Kick', zone: 'zone-drums' };
+        activeKeyMatrix['w'] = { sound: 'clap_909', label: '909 Clap', zone: 'zone-drums' };
+        activeKeyMatrix['a'] = { sound: 'bass_moog', label: 'Moog Saw', zone: 'zone-bass', freq: 110 };
+      } else if (preset === 'acoustic') {
+        activeKeyMatrix['q'] = { sound: 'kick_punch', label: 'Punch Kick', zone: 'zone-drums' };
+        activeKeyMatrix['w'] = { sound: 'snare_acoustic', label: 'Acoustic', zone: 'zone-drums' };
+        activeKeyMatrix['a'] = { sound: 'synth_rhodes', label: 'Rhodes C4', zone: 'zone-bass', freq: 261.63 };
       }
-      for (const [key, item] of Object.entries(activeKeyDatabase)) {
+      for (const [key, item] of Object.entries(activeKeyMatrix)) {
         const cap = document.getElementById(`key-${key}`);
         if (cap) {
-          cap.className = `key-cap ${item.zone}`;
+          cap.className = `key-unit ${item.zone}`;
           if (key === ' ') cap.className += ' w-space';
-          cap.innerHTML = `${key.toUpperCase()}<span class="sub-label">${item.label}</span>`;
+          cap.innerHTML = `${key.toUpperCase()}<span class="key-subtext">${item.label}</span>`;
         }
       }
     }
 
     // Init UI
-    renderLoopStrips();
+    renderTrackStrips();
   </script>
 </body>
 </html>
