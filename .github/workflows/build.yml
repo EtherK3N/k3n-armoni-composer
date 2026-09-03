@@ -46,6 +46,13 @@ jobs:
           echo "=== BUILD FAILURE LOG SNIPPET ==="
           grep -i -E -C 3 "error|fatal|fail" build.log | tail -n 120 || true
 
+      - name: Upload Build Log Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-log
+          path: build.log
+
       - name: Run Automated Test Suite
         shell: pwsh
         run: |

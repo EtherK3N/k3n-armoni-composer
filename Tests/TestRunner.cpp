@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include <iostream>
 #include <cassert>
+#include <cmath>
+#include <algorithm>
 #include "../Source/AudioEngine.h"
 #include "../Source/MappingEngine.h"
 #include "../Source/DeviceManager.h"

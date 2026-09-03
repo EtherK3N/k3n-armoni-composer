@@ -26,6 +26,7 @@
 #include <JuceHeader.h>
 #include <atomic>
 #include <cmath>
+#include <algorithm>
 
 //==============================================================================
 enum class GridResolution
