@@ -1,6 +1,6 @@
-# Contributing to K3N Armoni Composer / LoopStation
+# Contributing to K3N Armoni Composer
 
-First of all, thank you for your interest in contributing to **K3N Armoni Composer**! 🎉 We welcome contributions from developers, audio engineers, sound designers, and musicians of all skill levels.
+Thank you for your interest in contributing. This project welcomes contributions from developers, audio engineers, sound designers, and musicians of all skill levels.
 
 ---
 
@@ -19,7 +19,7 @@ Here are some great ways to get involved:
 1. **Fork the Repository**: Click the **Fork** button on GitHub.
 2. **Clone your fork locally**:
    ```bash
-   git clone --recursive https://github.com/YOUR_USERNAME/k3n-armoni-composer.git
+   git clone --recursive https://github.com/EtherK3N/k3n-armoni-composer.git
    cd k3n-armoni-composer
    ```
    *(If you already cloned without `--recursive`, run `git submodule update --init --recursive`)*
@@ -56,4 +56,4 @@ Here are some great ways to get involved:
 
 ## 💬 Community & Questions
 
-Feel free to open a [GitHub Discussion](https://github.com/YOUR_GITHUB/k3n-armoni-composer/discussions) or join our community threads for architectural questions, feature proposals, or pairing sessions.
+Open a [GitHub Issue](https://github.com/EtherK3N/k3n-armoni-composer/issues) or [Discussion](https://github.com/EtherK3N/k3n-armoni-composer/discussions) for architectural questions, feature proposals, hardware testing reports, or pairing sessions.
