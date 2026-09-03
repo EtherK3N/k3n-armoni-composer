@@ -32,7 +32,10 @@ juce_add_gui_app(LoopStation
     PRODUCT_NAME "LoopStation"
     COMPANY_NAME "k3n"
     VERSION 0.1.0
+    NEEDS_JUCE_HEADER TRUE
 )
+juce_generate_juce_header(LoopStation)
+
 
 target_sources(LoopStation PRIVATE
     Source/Main.cpp
@@ -77,7 +80,10 @@ endif()
 # ===========================================================================
 juce_add_console_app(LoopStation_Tests
     PRODUCT_NAME "LoopStation_Tests"
+    NEEDS_JUCE_HEADER TRUE
 )
+juce_generate_juce_header(LoopStation_Tests)
+
 
 target_sources(LoopStation_Tests PRIVATE
     Tests/TestRunner.cpp
