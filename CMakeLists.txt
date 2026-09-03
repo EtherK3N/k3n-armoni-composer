@@ -30,6 +30,8 @@ target_sources(LoopStation PRIVATE
     Source/RawInputHandler.cpp
     Source/MappingEngine.cpp
     Source/AudioEngine.cpp
+    Source/MetronomeClock.cpp
+    Source/BpmQuantizer.cpp
     Source/MappingEditorComponent.cpp
     Source/PerformanceViewComponent.cpp
 )
@@ -72,6 +74,8 @@ target_sources(LoopStation_Tests PRIVATE
     Source/RawInputHandler.cpp
     Source/MappingEngine.cpp
     Source/AudioEngine.cpp
+    Source/MetronomeClock.cpp
+    Source/BpmQuantizer.cpp
 )
 
 target_include_directories(LoopStation_Tests PRIVATE

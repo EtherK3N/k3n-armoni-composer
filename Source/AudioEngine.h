@@ -14,6 +14,9 @@
 #include <array>
 #include <unordered_map>
 #include <string>
+#include "MetronomeClock.h"
+#include "BpmQuantizer.h"
+
 
 class AudioEngine;
 
@@ -40,14 +43,19 @@ public:
     LoopTrack();
 
     void startRecording();
-    void stopRecordingAndStartLoop();
+    /** Stops recording and snaps the loop length to the nearest bar boundary. */
+    void stopRecordingAndStartLoop(const BpmQuantizer& quantizer, int beatsPerBar = 4);
     void clear();
+
     void setMuted(bool shouldBeMuted) { muted = shouldBeMuted; }
     bool isMuted() const { return muted; }
     bool isEmpty() const { return recordedEvents.isEmpty(); }
     bool isRecording() const { return recording; }
 
-    void recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples);
+    /** Records a trigger event, applying BPM quantization if a quantizer is provided. */
+    void recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples,
+                       const BpmQuantizer* quantizer = nullptr);
+
     juce::int64 getLoopLengthSamples() const { return loopLengthSamples; }
 
     /** Advances playback position for the current audio block and emits triggers. */
@@ -94,7 +102,13 @@ public:
 
     double getSampleRate() const { return currentSampleRate; }
 
+    // BPM & Clock access
+    MetronomeClock& getMetronome() { return metronome; }
+    BpmQuantizer&   getQuantizer() { return quantizer; }
+    void setTempo(double bpm);
+
     static constexpr int maxVoices = 32;
+
 
 private:
     juce::AudioFormatManager formatManager;
@@ -104,8 +118,19 @@ private:
     std::array<SamplerVoice, maxVoices> voices;
     juce::Array<LoopTrack*> activeLoopTracks;
 
+    MetronomeClock metronome;
+    BpmQuantizer   quantizer;
+
+    // Procedural click buffers for the metronome (generated once)
+    std::unique_ptr<juce::AudioBuffer<float>> clickDownbeatBuffer;
+    std::unique_ptr<juce::AudioBuffer<float>> clickBeatBuffer;
+    int clickDownbeatVoice = -1; // voice index reserved for click
+
     double currentSampleRate = 44100.0;
     juce::CriticalSection audioLock;
+
+    void generateClickBuffers();
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
 };

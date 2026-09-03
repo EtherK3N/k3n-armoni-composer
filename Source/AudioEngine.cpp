@@ -13,11 +13,15 @@ void LoopTrack::startRecording()
     playbackPositionSamples = 0;
 }
 
-void LoopTrack::stopRecordingAndStartLoop()
+void LoopTrack::stopRecordingAndStartLoop(const BpmQuantizer& quantizer, int beatsPerBar)
 {
     recording = false;
+    // Snap the loop length to the nearest bar boundary for tight loops
+    if (loopLengthSamples > 0)
+        loopLengthSamples = quantizer.snapLoopLengthToNearestBar(loopLengthSamples, beatsPerBar);
     playbackPositionSamples = 0;
 }
+
 
 void LoopTrack::clear()
 {
@@ -27,17 +31,22 @@ void LoopTrack::clear()
     playbackPositionSamples = 0;
 }
 
-void LoopTrack::recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples)
+void LoopTrack::recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples,
+                               const BpmQuantizer* quantizer)
 {
     if (! recording)
         return;
 
     TriggerEvent ev;
-    ev.sampleHandle = sampleHandle;
-    ev.offsetSamples = offsetInLoopSamples;
+    ev.sampleHandle  = sampleHandle;
+    ev.offsetSamples = (quantizer != nullptr)
+                       ? quantizer->quantize(offsetInLoopSamples, loopLengthSamples)
+                       : offsetInLoopSamples;
+
     recordedEvents.add(ev);
-    loopLengthSamples = juce::jmax(loopLengthSamples, offsetInLoopSamples + 1);
+    loopLengthSamples = juce::jmax(loopLengthSamples, ev.offsetSamples + 1);
 }
+
 
 void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
 {
@@ -85,7 +94,9 @@ AudioEngine::AudioEngine()
 {
     formatManager.registerBasicFormats();
     generateDefaultStarterKit();
+    generateClickBuffers();
 }
+
 
 AudioEngine::~AudioEngine() = default;
 
@@ -93,6 +104,8 @@ void AudioEngine::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     juce::ignoreUnused(samplesPerBlockExpected);
     currentSampleRate = sampleRate;
+    metronome.prepareToPlay(sampleRate, samplesPerBlockExpected);
+    quantizer.setSampleRate(sampleRate);
 
     const juce::ScopedLock sl(audioLock);
     for (auto& v : voices)
@@ -103,8 +116,10 @@ void AudioEngine::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     }
 }
 
+
 void AudioEngine::releaseResources()
 {
+    metronome.releaseResources();
     const juce::ScopedLock sl(audioLock);
     for (auto& v : voices)
     {
@@ -112,6 +127,7 @@ void AudioEngine::releaseResources()
         v.sourceBuffer = nullptr;
     }
 }
+
 
 void AudioEngine::registerLoopTrack(LoopTrack* track)
 {
@@ -131,6 +147,32 @@ void AudioEngine::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     bufferToFill.clearActiveBufferRegion();
 
     const juce::ScopedLock sl(audioLock);
+
+    // 0. Advance the metronome clock — emits beat events synchronously
+    metronome.processBlock(bufferToFill.numSamples, [this](const BeatEvent& ev)
+    {
+        // Generate a click sample trigger on beat/downbeat
+        if (! metronome.isClickEnabled())
+            return;
+
+        const bool isDown = (ev.type == BeatType::Downbeat);
+        auto* clickBuf = isDown ? clickDownbeatBuffer.get() : clickBeatBuffer.get();
+        if (clickBuf == nullptr)
+            return;
+
+        // Find a free voice for the click (skip voice stealing to protect musical voices)
+        for (auto& voice : voices)
+        {
+            if (! voice.isActive)
+            {
+                voice.sourceBuffer = clickBuf;
+                voice.position = 0;
+                voice.gain = isDown ? 0.22f : 0.08f;
+                voice.isActive = true;
+                break;
+            }
+        }
+    });
 
     // 1. Process active looper lanes
     for (auto* track : activeLoopTracks)
@@ -356,4 +398,47 @@ void AudioEngine::triggerSample(int sampleHandle, float gain)
     voices[stealIndex].position = 0;
     voices[stealIndex].gain = gain;
     voices[stealIndex].isActive = true;
+}
+
+void AudioEngine::setTempo(double bpm)
+{
+    metronome.setTempo(bpm);
+    quantizer.setTempo(bpm);
+}
+
+void AudioEngine::generateClickBuffers()
+{
+    // Downbeat click: higher-pitched woodblock at 1400Hz
+    {
+        const int len = static_cast<int>(44100.0 * 0.03);
+        auto buf = std::make_unique<juce::AudioBuffer<float>>(2, len);
+        buf->clear();
+        float phase = 0.0f;
+        for (int i = 0; i < len; ++i)
+        {
+            const float t = static_cast<float>(i) / len;
+            phase += static_cast<float>(juce::MathConstants<double>::twoPi * 1400.0 / 44100.0);
+            const float sample = std::sin(phase) * std::exp(-t * 60.0f) * 0.8f;
+            buf->setSample(0, i, sample);
+            buf->setSample(1, i, sample);
+        }
+        clickDownbeatBuffer = std::move(buf);
+    }
+
+    // Beat click: lower-pitched woodblock at 900Hz
+    {
+        const int len = static_cast<int>(44100.0 * 0.025);
+        auto buf = std::make_unique<juce::AudioBuffer<float>>(2, len);
+        buf->clear();
+        float phase = 0.0f;
+        for (int i = 0; i < len; ++i)
+        {
+            const float t = static_cast<float>(i) / len;
+            phase += static_cast<float>(juce::MathConstants<double>::twoPi * 900.0 / 44100.0);
+            const float sample = std::sin(phase) * std::exp(-t * 65.0f) * 0.4f;
+            buf->setSample(0, i, sample);
+            buf->setSample(1, i, sample);
+        }
+        clickBeatBuffer = std::move(buf);
+    }
 }

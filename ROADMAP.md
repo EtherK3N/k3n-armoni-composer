@@ -31,14 +31,14 @@ The core architecture and low-level technical foundations are implemented. The i
 **Goal**: Make the native app feel as tight and musical as a hardware loop station.
 
 ### Metronome & Clock Engine
-- [ ] Sample-accurate BPM clock in native C++ JUCE component
-- [ ] Time signature support: 4/4, 3/4, 6/8, and odd meters
-- [ ] Procedural click synthesis: accentuated downbeat, subdivisions (1/8, 1/16, 1/32, triplets)
+- [x] Sample-accurate BPM clock in native C++ JUCE component (`MetronomeClock`)
+- [x] Time signature support: 4/4, 3/4, 6/8, and odd meters
+- [x] Procedural click synthesis: accentuated downbeat, subdivisions (1/8, 1/16, 1/32, triplets)
 
 ### Input Quantization
-- [ ] Snap-to-grid: round recorded trigger timestamps to nearest grid subdivision
-- [ ] Configurable humanize/swing factor (0% = robotic grid, 100% = natural feel)
-- [ ] Auto-loop-length detection: snap loop end point to nearest bar boundary on recording stop
+- [x] Snap-to-grid: round recorded trigger timestamps to nearest grid subdivision (`BpmQuantizer`)
+- [x] Configurable humanize/swing factor (0% = robotic grid, 100% = natural feel)
+- [x] Auto-loop-length detection: snap loop end point to nearest bar boundary on recording stop
 
 ### Single-Keyboard Shift Layer System
 - [ ] `Shift` held: switch active key bank from Drums to Bass

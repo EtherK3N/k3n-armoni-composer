@@ -5,7 +5,7 @@
 [![C++ Standard](https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)](https://isocpp.org/)
 [![Framework](https://img.shields.io/badge/JUCE-7%20%2F%208-FF6600?style=for-the-badge&logoColor=white)](https://juce.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
-[![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL%20v3.0-blue?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-v0.1.0%20Preview-a855f7?style=for-the-badge)](ROADMAP.md)
 
 **Turn any cheap USB keyboard into a live loop station, drum machine, and synth rig.**  
@@ -165,4 +165,5 @@ Open for collaboration, feedback, and contributions via GitHub Issues and Discus
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This project is licensed under the terms of the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).  
+Commercial / closed-source licensing inquiries can be directed to the author.
