@@ -51,9 +51,15 @@ target_include_directories(LoopStation PRIVATE
     Source
 )
 
+if (WIN32)
+    add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN)
+endif()
+
 target_compile_definitions(LoopStation PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
+    NOMINMAX=1
+    WIN32_LEAN_AND_MEAN=1
 )
 
 target_link_libraries(LoopStation PRIVATE
@@ -100,6 +106,8 @@ target_include_directories(LoopStation_Tests PRIVATE
 target_compile_definitions(LoopStation_Tests PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
+    NOMINMAX=1
+    WIN32_LEAN_AND_MEAN=1
 )
 
 target_link_libraries(LoopStation_Tests PRIVATE

@@ -13,10 +13,6 @@
 #include <unordered_map>
 #include <string>
 
-#if JUCE_WINDOWS
- #include <windows.h>
-#endif
-
 /** Stable physical HID device identifier (Win32 Device Path). */
 using DeviceId = juce::String;
 

@@ -11,10 +11,17 @@
 
 #pragma once
 
+#ifndef NOMINMAX
+ #define NOMINMAX 1
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+ #define WIN32_LEAN_AND_MEAN 1
+#endif
+
 #include <juce_gui_basics/juce_gui_basics.h>
+#include "AudioEngine.h"
 #include "MappingEngine.h"
 #include "DeviceManager.h"
-#include "AudioEngine.h"
 
 class MappingEditorComponent;
 
