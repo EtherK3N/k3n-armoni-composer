@@ -26,9 +26,9 @@ Last Updated: **September 2026**
 2. **CMakeLists.txt**: JUCE 7/8 build setup including MetronomeClock and BpmQuantizer targets.
 3. **Tests/**: Automated Unit Test Suite (Tests/TestRunner.cpp) and Docker verification suite (Dockerfile / DOCKER_BUILD_AND_TEST.bat).
 4. **preview/**: Standalone browser workstation simulator (preview/index.html), LAUNCH_SIMULATOR.bat (and legacy AVVIA_SIMULATORE.bat), and BUILD_AND_RUN.bat.
-5. **CI/CD**: .github/workflows/build.yml with native MSVC runner, parallel build, always-on uild.log artifact capture, and executable release upload.
+5. **CI/CD**: .github/workflows/build.yml with native MSVC runner, parallel build, always-on  uild.log artifact capture, and executable release upload.
 6. **Documentation**:
-   - README.md, ARCHITECTURE.md, ROADMAP.md, AUDIT.md, CONTRIBUTING.md, TESTING.md, LICENSE (AGPL-3.0), RELEASE_NOTES_v0.1.0.md.
+   - README.md, ARCHITECTURE.md, ROADMAP.md, AUDIT.md, CONTRIBUTING.md, TESTING.md, SECURITY.md (SBOM & CRA compliance), LICENSE (AGPL-3.0), RELEASE_NOTES_v0.1.0.md.
 
 ---
 

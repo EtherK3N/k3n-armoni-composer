@@ -163,6 +163,12 @@ Open for collaboration, feedback, and contributions via GitHub Issues and Discus
 
 ---
 
+## Security & Compliance
+
+We adhere to modern cybersecurity resilience standards (including the EU Cyber Resilience Act / NIS2). For our complete Software Bill of Materials (SBOM), threat model, and vulnerability reporting process, see **[SECURITY.md](SECURITY.md)**.
+
+---
+
 ## License
 
 This project is licensed under the terms of the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).  
