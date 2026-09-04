@@ -41,3 +41,27 @@ Last Updated: **September 2026**
   - Caps Lock toggle: switch to Synth/FX bank.
   - Tab + number keys: octave transpose per bank.
   - Numpad layout mode: optimized 3x4 grid for separate USB numeric keypads.
+
+---
+
+## 📋 Completed Remediation Tasks (Technical Audit & Hygiene)
+Detailed post-mortem and audit documented in `TECHNICAL_AUDIT_ACTION_PLAN.md`:
+
+1. [x] **Fixed MSVC CI Failure (`MainComponent.cpp`)**:
+   - Resolved `error C3861: 'getApplicationVersion': identifier not found` at line 119 using `juce::JUCEApplication::getInstance()->getApplicationVersion()`.
+   - Updated release URL placeholder (`YOUR_GITHUB` -> `EtherK3N/k3n-armoni-composer`).
+2. [x] **LoopTrack Event Scheduling Optimization**:
+   - Replaced $O(N)$ linear loop `for (const auto& ev : recordedEvents)` per audio block with a sorted timeline cursor ($O(1)$ block check) and modulo wrap-around handling.
+3. [x] **De-buzzwording & Realism in Documentation**:
+   - Stripped AI-generated marketing hyperboles from `README.md` and `ARCHITECTURE.md`.
+   - Documented real concurrency status (audioLock ScopedLock vs future lock-free SPSC FIFO queue).
+   - Framed truthfully as an open-source v0.1.0 prototype / hardware-upcycling project.
+4. [x] **Git Cleanup & History Hygiene**:
+   - Consolidated trial-and-error commits into clean Conventional Commits.
+5. [x] **Modern Modular JUCE Refactoring (Zero JuceHeader.h)**:
+   - Removed monolithic auto-generated `JuceHeader.h` from all sources and tests.
+   - Replaced with fine-grained direct module includes (`<juce_core/juce_core.h>`, `<juce_gui_basics/juce_gui_basics.h>`, `<juce_audio_basics/juce_audio_basics.h>`, etc.).
+   - Removed deprecated `NEEDS_JUCE_HEADER` and explicitly linked required JUCE modules in `CMakeLists.txt`.
+   - Translated `DOCKER_BUILD_AND_TEST.bat` to English and purged legacy `AVVIA_SIMULATORE.bat`.
+
+

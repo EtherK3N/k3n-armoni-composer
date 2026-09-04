@@ -78,15 +78,15 @@ The critical technical challenge this solves: Windows normally merges all USB ke
 
 | Feature | Detail |
 |---|---|
-| Multi-keyboard disambiguation | Up to 16 concurrent USB keyboards, each mapped to a unique instrument role |
-| Sample-accurate loop engine | Timestamped event recording with modulo wrap-around playback |
-| 32-voice polyphonic sampler | Zero heap allocations in the audio thread |
-| Built-in procedural synth | 808 Kick, Snare, Hi-Hat, Sub-Bass, Acid 303, Moog Saw, Rhodes — no sample packs needed |
-| Custom sample import | Load WAV, MP3, FLAC, OGG at full lossless quality into RAM |
-| Per-track FX inserts | Independent Delay / Reverb / Filter routing per loop layer |
-| ASIO / WASAPI / DirectSound | Native pro-audio driver support via JUCE |
-| 100% offline | Zero cloud, zero telemetry, zero subscriptions |
-| < 5ms latency target | On ASIO with 128-sample buffer at 44.1kHz |
+| Multi-keyboard disambiguation | Up to 16 concurrent USB keyboards via Win32 Raw Input (`WM_INPUT`), each mapped to an independent instrument role |
+| Event-based looper (`LoopTrack`) | Sample-accurate timestamped event recording with sorted timeline cursor scheduling ($O(1)$ block processing) |
+| 32-voice polyphonic sampler | Pre-allocated voice pool with seamless voice-stealing on capacity |
+| Built-in procedural starter kit | Synthesized 808 Kick, Snare, Hi-Hat, Sub-Bass, Acid 303, Moog Saw, Rhodes for immediate playability |
+| Audio sample import | Lossless decoding of WAV, MP3, FLAC, OGG into pre-allocated memory buffers |
+| Modular FX architecture | Delay / Reverb / Low-pass filter routing per loop layer (implemented in preview simulator; native C++ DSP planned for v0.3.0) |
+| Audio backend drivers | ASIO / WASAPI / DirectSound device management via JUCE |
+| 100% offline | Zero cloud, zero telemetry, zero accounts |
+| Prototype latency target | Sub-10ms target on low-buffer ASIO/WASAPI exclusive configurations |
 
 ---
 

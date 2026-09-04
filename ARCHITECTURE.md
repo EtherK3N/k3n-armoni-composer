@@ -60,14 +60,16 @@ Standard OS keyboard APIs deliver unified key codes regardless of the connected 
 ---
 
 ## 2. Real-Time Audio Engine: `AudioEngine` & `LoopTrack`
-
-### Real-Time Safe Sampler Design
-- **Zero Allocations on Audio Thread**: `getNextAudioBlock()` never performs `new`, `malloc`, or dynamic memory reallocations.
-- **In-Memory Sample Cache**: All loaded audio samples (WAV, MP3, FLAC, AIFF) are pre-decoded into `juce::AudioBuffer<float>` RAM buffers upon import.
-- **Built-in Procedural Starter Kit**: Synthesizes 808 kicks, resonant snares, closed hi-hats, sub-bass, and melodic synth stabs into memory on startup, ensuring instant playability without requiring external sample downloads.
-- **Voice Stealing Algorithm**: 32 concurrent voices. When full, the engine transparently steals the voice furthest along in playback without audible clicks.
+ 
+### Sampler Architecture
+- **In-Memory Sample Cache**: All loaded audio samples (WAV, MP3, FLAC, AIFF) and procedural starter instruments are pre-decoded into `juce::AudioBuffer<float>` RAM buffers upon import.
+- **Voice Allocation**: Fixed pool of 32 concurrent voices (`std::array<SamplerVoice, 32>`). When capacity is reached, an internal heuristic steals the voice furthest along in its playback trajectory.
+- **Thread Safety & Mutex Design**:
+  - *Current Prototype State (v0.1.0)*: The real-time callback `AudioEngine::getNextAudioBlock()` guards voice playback with `const juce::ScopedLock sl(audioLock)`.
+  - *Roadmap Evolution*: To ensure strict real-time safety under high contention, the audio thread will be decoupled from GUI mutations using a lock-free Single-Producer Single-Consumer (SPSC) ring buffer / FIFO command queue for trigger events.
 
 ### Multi-Track Looper (`LoopTrack`)
 - Each track records discrete timestamped trigger events: `TriggerEvent { int sampleHandle; juce::int64 offsetSamples; }`.
-- During `AudioEngine::getNextAudioBlock()`, `LoopTrack::processAudioBlock()` monitors the current audio block sample window $[p, p + N)$ and triggers voices directly within the audio callback.
-- Guarantees sample-accurate synchronization free from OS timer jitter.
+- **Sorted Timeline Scheduling ($O(1)$ block check)**: Recorded events are kept sorted chronologically by `offsetSamples`. During `processAudioBlock(numSamples, engine)`, playback advances via an internal index cursor (`nextEventIndex`), checking only adjacent events within the block's sample window rather than performing linear scans across all events.
+- **Loop Wrap-Around**: When the audio block boundary crosses `loopLengthSamples`, the scheduler fires remaining events in the cycle, resets the cursor to zero, and fires events falling into the beginning of the next cycle.
+- **Quantization Integration**: When recording stops, loop lengths can snap to musical bar boundaries, and triggers can be quantized to musical sub-divisions using `BpmQuantizer`.
