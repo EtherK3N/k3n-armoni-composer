@@ -32,7 +32,6 @@ juce_add_gui_app(LoopStation
     PRODUCT_NAME "LoopStation"
     COMPANY_NAME "k3n"
     VERSION 0.1.0
-    NEEDS_JUCE_HEADER TRUE
 )
 
 target_sources(LoopStation PRIVATE
@@ -58,10 +57,17 @@ target_compile_definitions(LoopStation PRIVATE
 )
 
 target_link_libraries(LoopStation PRIVATE
-    juce::juce_audio_utils
+    juce::juce_core
+    juce::juce_events
+    juce::juce_graphics
+    juce::juce_data_structures
+    juce::juce_gui_basics
+    juce::juce_gui_extra
+    juce::juce_audio_basics
     juce::juce_audio_devices
     juce::juce_audio_formats
-    juce::juce_gui_extra
+    juce::juce_audio_processors
+    juce::juce_audio_utils
     juce::juce_recommended_config_flags
 )
 
@@ -75,7 +81,6 @@ endif()
 # ===========================================================================
 juce_add_console_app(LoopStation_Tests
     PRODUCT_NAME "LoopStation_Tests"
-    NEEDS_JUCE_HEADER TRUE
 )
 
 target_sources(LoopStation_Tests PRIVATE
@@ -98,10 +103,17 @@ target_compile_definitions(LoopStation_Tests PRIVATE
 )
 
 target_link_libraries(LoopStation_Tests PRIVATE
-    juce::juce_audio_utils
+    juce::juce_core
+    juce::juce_events
+    juce::juce_graphics
+    juce::juce_data_structures
+    juce::juce_gui_basics
+    juce::juce_gui_extra
+    juce::juce_audio_basics
     juce::juce_audio_devices
     juce::juce_audio_formats
-    juce::juce_gui_extra
+    juce::juce_audio_processors
+    juce::juce_audio_utils
     juce::juce_recommended_config_flags
 )
 

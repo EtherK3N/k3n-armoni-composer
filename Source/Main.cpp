@@ -6,7 +6,7 @@
       - Win32 WndProc Subclassing to capture WM_INPUT and forward to RawInputHandler
 */
 
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #include "MainComponent.h"
 
 #if JUCE_WINDOWS

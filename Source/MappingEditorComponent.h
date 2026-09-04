@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #include "MappingEngine.h"
 #include "DeviceManager.h"
 #include "AudioEngine.h"

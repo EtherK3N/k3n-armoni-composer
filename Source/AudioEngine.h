@@ -10,10 +10,13 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include <juce_core/juce_core.h>
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_formats/juce_audio_formats.h>
 #include <array>
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 #include "MetronomeClock.h"
 #include "BpmQuantizer.h"
 
@@ -67,10 +70,13 @@ public:
     juce::Array<TriggerEvent> recordedEvents;
 
 private:
+    void sortEvents();
+
     bool muted = false;
     bool recording = false;
     juce::int64 loopLengthSamples = 0;
     juce::int64 playbackPositionSamples = 0;
+    int nextEventIndex = 0;
 };
 
 class AudioEngine : public juce::AudioSource

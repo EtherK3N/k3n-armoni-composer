@@ -10,7 +10,8 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_audio_utils/juce_audio_utils.h>
 #include "AudioEngine.h"
 #include "DeviceManager.h"
 #include "MappingEngine.h"

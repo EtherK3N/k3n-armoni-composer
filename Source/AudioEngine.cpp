@@ -11,24 +11,35 @@ void LoopTrack::startRecording()
     recording = true;
     loopLengthSamples = 0;
     playbackPositionSamples = 0;
+    nextEventIndex = 0;
+}
+
+void LoopTrack::sortEvents()
+{
+    std::sort(recordedEvents.begin(), recordedEvents.end(),
+              [](const TriggerEvent& a, const TriggerEvent& b)
+              {
+                  return a.offsetSamples < b.offsetSamples;
+              });
 }
 
 void LoopTrack::stopRecordingAndStartLoop()
 {
     recording = false;
+    sortEvents();
     playbackPositionSamples = 0;
+    nextEventIndex = 0;
 }
 
 void LoopTrack::stopRecordingAndStartLoop(const BpmQuantizer& quantizer, int beatsPerBar)
 {
     recording = false;
-    // Snap the loop length to the nearest bar boundary for tight loops
     if (loopLengthSamples > 0)
         loopLengthSamples = quantizer.snapLoopLengthToNearestBar(loopLengthSamples, beatsPerBar);
+    sortEvents();
     playbackPositionSamples = 0;
+    nextEventIndex = 0;
 }
-
-
 
 void LoopTrack::clear()
 {
@@ -36,6 +47,7 @@ void LoopTrack::clear()
     recording = false;
     loopLengthSamples = 0;
     playbackPositionSamples = 0;
+    nextEventIndex = 0;
 }
 
 void LoopTrack::recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples,
@@ -54,7 +66,6 @@ void LoopTrack::recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples,
     loopLengthSamples = juce::jmax(loopLengthSamples, ev.offsetSamples + 1);
 }
 
-
 void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
 {
     if (recording)
@@ -63,32 +74,51 @@ void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
         return;
     }
 
-    if (muted || isEmpty() || loopLengthSamples <= 0)
+    if (muted || recordedEvents.isEmpty() || loopLengthSamples <= 0)
         return;
 
     const juce::int64 startPos = playbackPositionSamples;
     const juce::int64 endPos = startPos + numSamples;
+    const int totalEvents = recordedEvents.size();
 
-    for (const auto& ev : recordedEvents)
+    // Re-synchronize event cursor if desynchronized or seeking occurred
+    if (nextEventIndex < 0
+        || (nextEventIndex < totalEvents && recordedEvents[nextEventIndex].offsetSamples < startPos)
+        || (nextEventIndex > 0 && recordedEvents[nextEventIndex - 1].offsetSamples >= startPos))
     {
-        if (ev.sampleHandle < 0)
-            continue;
+        auto it = std::lower_bound(recordedEvents.begin(), recordedEvents.end(), startPos,
+                                   [](const TriggerEvent& ev, juce::int64 pos) {
+                                       return ev.offsetSamples < pos;
+                                   });
+        nextEventIndex = static_cast<int>(std::distance(recordedEvents.begin(), it));
+    }
 
-        bool shouldTrigger = false;
-        if (endPos <= loopLengthSamples)
+    if (endPos <= loopLengthSamples)
+    {
+        while (nextEventIndex < totalEvents && recordedEvents[nextEventIndex].offsetSamples < endPos)
         {
-            if (ev.offsetSamples >= startPos && ev.offsetSamples < endPos)
-                shouldTrigger = true;
+            const auto& ev = recordedEvents[nextEventIndex++];
+            if (ev.offsetSamples >= startPos && ev.sampleHandle >= 0)
+                engine.triggerSample(ev.sampleHandle);
         }
-        else // Loop wrap around
+    }
+    else
+    {
+        while (nextEventIndex < totalEvents)
         {
-            const juce::int64 wrappedEnd = endPos % loopLengthSamples;
-            if (ev.offsetSamples >= startPos || ev.offsetSamples < wrappedEnd)
-                shouldTrigger = true;
+            const auto& ev = recordedEvents[nextEventIndex++];
+            if (ev.offsetSamples >= startPos && ev.sampleHandle >= 0)
+                engine.triggerSample(ev.sampleHandle);
         }
 
-        if (shouldTrigger)
-            engine.triggerSample(ev.sampleHandle);
+        nextEventIndex = 0;
+        const juce::int64 wrappedEnd = endPos % loopLengthSamples;
+        while (nextEventIndex < totalEvents && recordedEvents[nextEventIndex].offsetSamples < wrappedEnd)
+        {
+            const auto& ev = recordedEvents[nextEventIndex++];
+            if (ev.sampleHandle >= 0)
+                engine.triggerSample(ev.sampleHandle);
+        }
     }
 
     playbackPositionSamples = (playbackPositionSamples + numSamples) % loopLengthSamples;
