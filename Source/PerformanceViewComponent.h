@@ -13,6 +13,7 @@
 #include "AudioEngine.h"
 #include "MappingEngine.h"
 #include "DeviceManager.h"
+#include "ShiftLayerSystem.h"
 
 class PerformanceViewComponent : public juce::Component,
                                   private juce::Button::Listener,
@@ -23,6 +24,10 @@ public:
     ~PerformanceViewComponent() override;
 
     void resized() override;
+
+    /** Access layer system for configuration / status inquiry. */
+    ShiftLayerSystem& getShiftLayers() { return shiftLayers; }
+    const ShiftLayerSystem& getShiftLayers() const { return shiftLayers; }
 
     /** Processes incoming key events: plays one-shot sample and overdubs onto active loop track if recording. */
     void handleKeyEvent(const RawKeyEvent& event, KeyboardRole role);
@@ -52,6 +57,11 @@ private:
     DeviceManager& devices;
 
     juce::OwnedArray<TrackRow> tracks;
+
+    ShiftLayerSystem shiftLayers;
+    juce::Label hudBankLabel;
+    juce::Label hudOctaveLabel;
+    juce::ToggleButton numpadModeToggle { "Numpad 3x4 Matrix" };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PerformanceViewComponent)
 };

@@ -17,6 +17,7 @@
 #include "../Source/AudioEngine.h"
 #include "../Source/MappingEngine.h"
 #include "../Source/DeviceManager.h"
+#include "../Source/ShiftLayerSystem.h"
 
 // Simple lightweight test harness
 #define RUN_TEST(fn) \
@@ -188,6 +189,178 @@ void testBpmQuantizerGridMath()
     assert(twoBarSnapped == 176400 && "170000 samples must snap to 176400 (2 bars)");
 }
 
+void testShiftLayerSystemBankAndModifiers()
+{
+    ShiftLayerSystem system;
+    assert(system.getActiveBank() == KeyBank::Drums && "Default bank must be Drums");
+    assert(system.getActiveOctaveOffset() == 0 && "Default octave offset must be 0");
+
+    ProcessedKeyEvent out;
+    RawKeyEvent ev;
+    ev.deviceId = "DEV_1";
+    ev.isKeyDown = true;
+
+    // Shift Key Down -> Switches to Bass bank
+    ev.virtualKeyCode = 0x10; // VK_SHIFT
+    bool trigger = system.processKeyEvent(ev, out);
+    assert(! trigger && "Shift key must be intercepted as modifier");
+    assert(system.getActiveBank() == KeyBank::Bass && "Shift held must activate Bass bank");
+
+    // Regular key while Shift held
+    ev.virtualKeyCode = 0x41; // 'A'
+    trigger = system.processKeyEvent(ev, out);
+    assert(trigger && "Key 'A' should trigger");
+    assert(out.activeBank == KeyBank::Bass && "Event bank must be Bass");
+
+    // Shift Key Up -> Restores to Drums bank
+    ev.virtualKeyCode = 0x10;
+    ev.isKeyDown = false;
+    trigger = system.processKeyEvent(ev, out);
+    assert(! trigger && "Shift release must be intercepted");
+    assert(system.getActiveBank() == KeyBank::Drums && "Releasing Shift must restore Drums bank");
+
+    // CapsLock Toggle -> Switches to Synth bank
+    ev.virtualKeyCode = 0x14; // VK_CAPITAL
+    ev.isKeyDown = true;
+    system.processKeyEvent(ev, out);
+    assert(system.getActiveBank() == KeyBank::Synth && "CapsLock must activate Synth bank");
+
+    // Shift while CapsLock is ON -> Switches to FX bank
+    ev.virtualKeyCode = 0x10; // VK_SHIFT
+    ev.isKeyDown = true;
+    system.processKeyEvent(ev, out);
+    assert(system.getActiveBank() == KeyBank::FX && "CapsLock + Shift must activate FX bank");
+
+    // Release Shift while CapsLock ON -> Returns to Synth bank
+    ev.isKeyDown = false;
+    system.processKeyEvent(ev, out);
+    assert(system.getActiveBank() == KeyBank::Synth && "Releasing Shift with CapsLock ON must return to Synth bank");
+
+    // CapsLock Toggle again -> Restores Drums bank
+    ev.virtualKeyCode = 0x14;
+    ev.isKeyDown = true;
+    system.processKeyEvent(ev, out);
+    assert(system.getActiveBank() == KeyBank::Drums && "Disabling CapsLock must restore Drums bank");
+
+    // Tab + Number key Octave transposition
+    ev.virtualKeyCode = 0x09; // VK_TAB
+    ev.isKeyDown = true;
+    trigger = system.processKeyEvent(ev, out);
+    assert(! trigger && "Tab press must be intercepted");
+    assert(system.isTabHeld() && "Tab must be flagged as held");
+
+    // While Tab held, press '1' (VK 0x31) -> sets octave to -2
+    ev.virtualKeyCode = 0x31;
+    trigger = system.processKeyEvent(ev, out);
+    assert(! trigger && "Tab+1 must be intercepted and not trigger audio");
+    assert(system.getActiveOctaveOffset() == -2 && "Octave must be set to -2");
+
+    // While Tab held, press '4' (VK 0x34) -> sets octave to +1
+    ev.virtualKeyCode = 0x34;
+    system.processKeyEvent(ev, out);
+    assert(system.getActiveOctaveOffset() == 1 && "Octave must be set to +1");
+
+    // Release Tab
+    ev.virtualKeyCode = 0x09;
+    ev.isKeyDown = false;
+    system.processKeyEvent(ev, out);
+    assert(! system.isTabHeld() && "Tab must no longer be held");
+
+    // Regular key now carries octave +1
+    ev.virtualKeyCode = 0x43; // 'C'
+    ev.isKeyDown = true;
+    trigger = system.processKeyEvent(ev, out);
+    assert(trigger && "Key 'C' must trigger");
+    assert(out.octaveOffset == 1 && "Trigger event must carry active octave offset +1");
+
+    // Test Numpad mode mapping
+    system.setNumpadModeEnabled(true);
+    ev.virtualKeyCode = 0x67; // VK_NUMPAD7
+    system.processKeyEvent(ev, out);
+    assert(out.effectiveVirtualKeyCode == 0x101 && "Numpad 7 must translate to Pad 1 (0x101)");
+
+    ev.virtualKeyCode = 0x61; // VK_NUMPAD1
+    system.processKeyEvent(ev, out);
+    assert(out.effectiveVirtualKeyCode == 0x107 && "Numpad 1 must translate to Pad 7 (0x107)");
+
+    ev.virtualKeyCode = 0x6E; // VK_DECIMAL
+    system.processKeyEvent(ev, out);
+    assert(out.effectiveVirtualKeyCode == 0x10B && "VK_DECIMAL must translate to Pad 11 (0x10B)");
+}
+
+void testBankAwareMappingEngine()
+{
+    MappingEngine mapping;
+    const DeviceId testDev = "KEYBOARD_LAYER_TEST";
+
+    // Map 'A' (0x41) on Drums (bank 0) to Kick
+    mapping.assignKey(testDev, 0x41, "Drums Kick", "starter://kick", 0);
+
+    // Map 'A' (0x41) on Bass (bank 1) to 808 Bass
+    mapping.assignKey(testDev, 0x41, "Sub Bass 808", "starter://bass808", 1);
+
+    // Map 'B' (0x42) only on bank 0
+    mapping.assignKey(testDev, 0x42, "Snare", "starter://snare", 0);
+
+    // Lookups
+    const auto* bDrumsA = mapping.findBinding(testDev, 0x41, 0);
+    assert(bDrumsA != nullptr && bDrumsA->soundLabel == "Drums Kick");
+
+    const auto* bBassA = mapping.findBinding(testDev, 0x41, 1);
+    assert(bBassA != nullptr && bBassA->soundLabel == "Sub Bass 808");
+
+    // Fallback: looking up 'B' in bank 1 should fall back to bank 0
+    const auto* bBassB = mapping.findBinding(testDev, 0x42, 1);
+    assert(bBassB != nullptr && bBassB->soundLabel == "Snare" && "Must fall back to default bank 0");
+
+    // Test persistence of bank in JSON
+    mapping.saveActiveSetToDisk();
+    mapping.loadActiveSetFromDisk();
+
+    const auto* reloadBassA = mapping.findBinding(testDev, 0x41, 1);
+    assert(reloadBassA != nullptr && reloadBassA->soundLabel == "Sub Bass 808");
+    assert(reloadBassA->bank == 1 && "Persisted binding must retain bank 1");
+}
+
+void testLoopTrackEventEditingAndParamLocks()
+{
+    LoopTrack track;
+    track.startRecording();
+    track.recordTrigger(1, 100);
+    track.recordTrigger(2, 500);
+    track.recordTrigger(3, 900);
+    track.stopRecordingAndStartLoop();
+
+    assert(track.recordedEvents.size() == 3 && "Track must have 3 events");
+
+    // 1. Test moveEvent (nudge)
+    track.moveEvent(0, 120);
+    assert(track.recordedEvents[0].offsetSamples == 120 && "Event 0 should move to 120");
+
+    // Move event 0 past event 1 (from 120 to 600) -> should auto-sort!
+    track.moveEvent(0, 600);
+    assert(track.recordedEvents[0].sampleHandle == 2 && "Event 1 (offset 500) should now be first");
+    assert(track.recordedEvents[1].sampleHandle == 1 && track.recordedEvents[1].offsetSamples == 600 && "Event 1 should be at 600");
+
+    // 2. Test duration & parameter locks
+    track.setEventDuration(0, 4410);
+    assert(track.recordedEvents[0].durationSamples == 4410 && "Event duration must be set");
+
+    track.setEventParams(0, 1.5f, 7.0f, 0.4f, 0.25f, 0.8f);
+    assert(track.recordedEvents[0].gain == 1.5f && "Velocity must be 1.5");
+    assert(track.recordedEvents[0].pitchSemitones == 7.0f && "Pitch must be +7 semitones");
+    assert(track.recordedEvents[0].reverbSend == 0.4f && "Reverb send must be 0.4");
+    assert(track.recordedEvents[0].delaySend == 0.25f && "Delay send must be 0.25");
+
+    // 3. Test duplicate
+    track.duplicateEvent(0, 50);
+    assert(track.recordedEvents.size() == 4 && "Track must now have 4 events");
+
+    // 4. Test remove
+    track.removeEvent(0);
+    assert(track.recordedEvents.size() == 3 && "Track must have 3 events after removal");
+}
+
 int main(int argc, char* argv[])
 {
     juce::ignoreUnused(argc, argv);
@@ -200,9 +373,12 @@ int main(int argc, char* argv[])
     RUN_TEST(testMappingEngineJsonSerialization);
     RUN_TEST(testMetronomeClockAccuracy);
     RUN_TEST(testBpmQuantizerGridMath);
+    RUN_TEST(testShiftLayerSystemBankAndModifiers);
+    RUN_TEST(testBankAwareMappingEngine);
+    RUN_TEST(testLoopTrackEventEditingAndParamLocks);
 
     std::cout << "\n=======================================================\n";
-    std::cout << "  ALL 5 TEST SUITES PASSED! (100% Core Integrity)\n";
+    std::cout << "  ALL 8 TEST SUITES PASSED! (100% Core Integrity)\n";
     std::cout << "=======================================================\n\n";
     return 0;
 }

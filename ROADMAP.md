@@ -41,10 +41,10 @@ The core architecture and low-level technical foundations are implemented. The i
 - [x] Auto-loop-length detection: snap loop end point to nearest bar boundary on recording stop
 
 ### Single-Keyboard Shift Layer System
-- [ ] `Shift` held: switch active key bank from Drums to Bass
-- [ ] `Caps Lock` toggle: switch to Synth/FX bank
-- [ ] `Tab` + number keys: octave transpose per bank
-- [ ] Numpad layout mode: optimized 3x4 grid for separate USB numeric keypads
+- [x] `Shift` held: switch active key bank from Drums to Bass
+- [x] `Caps Lock` toggle: switch to Synth/FX bank
+- [x] `Tab` + number keys: octave transpose per bank
+- [x] Numpad layout mode: optimized 3x4 grid for separate USB numeric keypads
 
 ---
 

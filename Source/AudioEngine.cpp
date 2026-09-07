@@ -66,6 +66,64 @@ void LoopTrack::recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples,
     loopLengthSamples = juce::jmax(loopLengthSamples, ev.offsetSamples + 1);
 }
 
+void LoopTrack::moveEvent(int eventIndex, juce::int64 newOffsetSamples)
+{
+    if (eventIndex < 0 || eventIndex >= recordedEvents.size())
+        return;
+
+    const juce::int64 maxOffset = loopLengthSamples > 0 ? loopLengthSamples - 1 : newOffsetSamples;
+    recordedEvents.getReference(eventIndex).offsetSamples = juce::jlimit<juce::int64>(0, maxOffset, newOffsetSamples);
+    sortEvents();
+}
+
+void LoopTrack::setEventDuration(int eventIndex, juce::int64 durationSamples)
+{
+    if (eventIndex < 0 || eventIndex >= recordedEvents.size())
+        return;
+
+    recordedEvents.getReference(eventIndex).durationSamples = juce::jmax<juce::int64>(0, durationSamples);
+}
+
+void LoopTrack::setEventParams(int eventIndex, float gain, float pitchSemitones,
+                              float reverbSend, float delaySend, float filterCutoff)
+{
+    if (eventIndex < 0 || eventIndex >= recordedEvents.size())
+        return;
+
+    auto& ev = recordedEvents.getReference(eventIndex);
+    ev.gain = juce::jlimit(0.0f, 2.0f, gain);
+    ev.pitchSemitones = juce::jlimit(-24.0f, 24.0f, pitchSemitones);
+    ev.reverbSend = juce::jlimit(0.0f, 1.0f, reverbSend);
+    ev.delaySend = juce::jlimit(0.0f, 1.0f, delaySend);
+    ev.filterCutoff = juce::jlimit(0.0f, 1.0f, filterCutoff);
+}
+
+void LoopTrack::removeEvent(int eventIndex)
+{
+    if (eventIndex >= 0 && eventIndex < recordedEvents.size())
+    {
+        recordedEvents.remove(eventIndex);
+        if (nextEventIndex >= recordedEvents.size())
+            nextEventIndex = 0;
+    }
+}
+
+void LoopTrack::duplicateEvent(int eventIndex, juce::int64 duplicateOffsetSamples)
+{
+    if (eventIndex < 0 || eventIndex >= recordedEvents.size())
+        return;
+
+    TriggerEvent copy = recordedEvents[eventIndex];
+    const juce::int64 shift = duplicateOffsetSamples > 0 ? duplicateOffsetSamples : 4410; // ~100ms default
+    if (loopLengthSamples > 0)
+        copy.offsetSamples = (copy.offsetSamples + shift) % loopLengthSamples;
+    else
+        copy.offsetSamples += shift;
+
+    recordedEvents.add(copy);
+    sortEvents();
+}
+
 void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
 {
     if (recording)
@@ -99,7 +157,7 @@ void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
         {
             const auto& ev = recordedEvents[nextEventIndex++];
             if (ev.offsetSamples >= startPos && ev.sampleHandle >= 0)
-                engine.triggerSample(ev.sampleHandle);
+                engine.triggerSample(ev.sampleHandle, ev.gain);
         }
     }
     else
@@ -108,7 +166,7 @@ void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
         {
             const auto& ev = recordedEvents[nextEventIndex++];
             if (ev.offsetSamples >= startPos && ev.sampleHandle >= 0)
-                engine.triggerSample(ev.sampleHandle);
+                engine.triggerSample(ev.sampleHandle, ev.gain);
         }
 
         nextEventIndex = 0;
@@ -117,7 +175,7 @@ void LoopTrack::processAudioBlock(int numSamples, AudioEngine& engine)
         {
             const auto& ev = recordedEvents[nextEventIndex++];
             if (ev.sampleHandle >= 0)
-                engine.triggerSample(ev.sampleHandle);
+                engine.triggerSample(ev.sampleHandle, ev.gain);
         }
     }
 

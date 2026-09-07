@@ -43,6 +43,7 @@ target_sources(LoopStation PRIVATE
     Source/AudioEngine.cpp
     Source/MetronomeClock.cpp
     Source/BpmQuantizer.cpp
+    Source/ShiftLayerSystem.cpp
     Source/MappingEditorComponent.cpp
     Source/PerformanceViewComponent.cpp
 )
@@ -97,6 +98,7 @@ target_sources(LoopStation_Tests PRIVATE
     Source/AudioEngine.cpp
     Source/MetronomeClock.cpp
     Source/BpmQuantizer.cpp
+    Source/ShiftLayerSystem.cpp
 )
 
 target_include_directories(LoopStation_Tests PRIVATE

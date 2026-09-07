@@ -48,6 +48,23 @@ PerformanceViewComponent::PerformanceViewComponent(AudioEngine& audioEngine, Map
         tracks.add(row);
     }
 
+    hudBankLabel.setJustificationType(juce::Justification::centred);
+    hudOctaveLabel.setJustificationType(juce::Justification::centred);
+
+    addAndMakeVisible(hudBankLabel);
+    addAndMakeVisible(hudOctaveLabel);
+    addAndMakeVisible(numpadModeToggle);
+
+    numpadModeToggle.onClick = [this]
+    {
+        shiftLayers.setNumpadModeEnabled(numpadModeToggle.getToggleState());
+    };
+
+    shiftLayers.onStateChanged = [this](KeyBank, int)
+    {
+        updateStatusLabels();
+    };
+
     updateStatusLabels();
     startTimerHz(15);
 }
@@ -65,6 +82,14 @@ PerformanceViewComponent::~PerformanceViewComponent()
 void PerformanceViewComponent::resized()
 {
     auto area = getLocalBounds().reduced(12);
+
+    // Layer System HUD Bar
+    auto hudArea = area.removeFromTop(34);
+    hudBankLabel.setBounds(hudArea.removeFromLeft(220).reduced(2));
+    hudOctaveLabel.setBounds(hudArea.removeFromLeft(180).reduced(2));
+    numpadModeToggle.setBounds(hudArea.removeFromLeft(180).reduced(2));
+    area.removeFromTop(10);
+
     const int rowHeight = 44;
 
     for (auto* row : tracks)
@@ -126,6 +151,29 @@ void PerformanceViewComponent::timerCallback()
 
 void PerformanceViewComponent::updateStatusLabels()
 {
+    // Update Layer System HUD
+    const auto activeBank = shiftLayers.getActiveBank();
+    juce::String bankText = "BANK: " + getBankName(activeBank);
+    if (shiftLayers.isShiftHeld())
+        bankText << " [SHIFT]";
+    if (shiftLayers.isCapsLockOn())
+        bankText << " [CAPS]";
+
+    hudBankLabel.setText(bankText, juce::dontSendNotification);
+
+    juce::Colour bankCol = juce::Colour(0xff00d2ff); // Drums (cyan)
+    if (activeBank == KeyBank::Bass)       bankCol = juce::Colour(0xffff9900); // Bass (orange)
+    else if (activeBank == KeyBank::Synth) bankCol = juce::Colour(0xffd050ff); // Synth (magenta)
+    else if (activeBank == KeyBank::FX)    bankCol = juce::Colour(0xffffdd00); // FX (yellow)
+
+    hudBankLabel.setColour(juce::Label::textColourId, bankCol);
+
+    const int oct = shiftLayers.getActiveOctaveOffset();
+    juce::String octText = "OCT: " + (oct > 0 ? "+" : "") + juce::String(oct) + " (Tab+1..5)";
+    hudOctaveLabel.setText(octText, juce::dontSendNotification);
+
+    numpadModeToggle.setToggleState(shiftLayers.isNumpadModeEnabled(), juce::dontSendNotification);
+
     for (auto* row : tracks)
     {
         juce::String status = row->label + ": ";
@@ -154,10 +202,15 @@ void PerformanceViewComponent::updateStatusLabels()
 
 void PerformanceViewComponent::handleKeyEvent(const RawKeyEvent& event, KeyboardRole role)
 {
-    if (! event.isKeyDown)
+    ProcessedKeyEvent processed;
+    const bool isTrigger = shiftLayers.processKeyEvent(event, processed);
+
+    if (! isTrigger || ! processed.isKeyDown)
         return;
 
-    const auto* binding = mapping.findBinding(event.deviceId, event.virtualKeyCode);
+    const auto* binding = mapping.findBinding(processed.deviceId,
+                                              processed.effectiveVirtualKeyCode,
+                                              static_cast<int>(processed.activeBank));
     if (binding == nullptr || binding->soundPath.isEmpty())
         return;
 

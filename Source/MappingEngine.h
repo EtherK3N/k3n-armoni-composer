@@ -15,6 +15,7 @@ struct KeyBinding
     int virtualKeyCode = 0;
     juce::String soundLabel;
     juce::String soundPath;
+    int bank = 0; // 0 = Drums, 1 = Bass, 2 = Synth, 3 = FX
 };
 
 struct DeviceMapping
@@ -35,18 +36,20 @@ public:
     MappingEngine();
     ~MappingEngine();
 
-    /** Assigns or updates a binding for a given device and virtual key code. */
+    /** Assigns or updates a binding for a given device, virtual key code, and bank. */
     void assignKey(const DeviceId& deviceId, int virtualKeyCode,
-                   const juce::String& soundLabel, const juce::String& soundPath);
+                   const juce::String& soundLabel, const juce::String& soundPath,
+                   int bank = 0);
 
-    /** Removes a key binding. */
-    void removeBinding(const DeviceId& deviceId, int virtualKeyCode);
+    /** Removes a key binding for a specific bank (or all banks if bank == -1). */
+    void removeBinding(const DeviceId& deviceId, int virtualKeyCode, int bank = 0);
 
     /** Renames the descriptive label for a key binding. */
-    void renameBinding(const DeviceId& deviceId, int virtualKeyCode, const juce::String& newLabel);
+    void renameBinding(const DeviceId& deviceId, int virtualKeyCode, const juce::String& newLabel, int bank = 0);
 
-    /** Looks up a binding for a given device and key code. Returns nullptr if unassigned. */
-    const KeyBinding* findBinding(const DeviceId& deviceId, int virtualKeyCode) const;
+    /** Looks up a binding for a given device, key code, and bank.
+        Falls back to default bank (0) if no bank-specific binding is found. */
+    const KeyBinding* findBinding(const DeviceId& deviceId, int virtualKeyCode, int bank = 0) const;
 
     /** Access active preset in memory. */
     MappingSet& getActiveSet() { return activeSet; }

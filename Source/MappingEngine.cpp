@@ -11,7 +11,8 @@ MappingEngine::~MappingEngine()
 }
 
 void MappingEngine::assignKey(const DeviceId& deviceId, int virtualKeyCode,
-                             const juce::String& soundLabel, const juce::String& soundPath)
+                             const juce::String& soundLabel, const juce::String& soundPath,
+                             int bank)
 {
     DeviceMapping* targetDeviceMapping = nullptr;
     for (auto& dm : activeSet.deviceMappings)
@@ -34,7 +35,7 @@ void MappingEngine::assignKey(const DeviceId& deviceId, int virtualKeyCode,
     bool found = false;
     for (auto& b : targetDeviceMapping->bindings)
     {
-        if (b.virtualKeyCode == virtualKeyCode)
+        if (b.virtualKeyCode == virtualKeyCode && b.bank == bank)
         {
             b.soundLabel = soundLabel;
             b.soundPath = soundPath;
@@ -49,6 +50,7 @@ void MappingEngine::assignKey(const DeviceId& deviceId, int virtualKeyCode,
         b.virtualKeyCode = virtualKeyCode;
         b.soundLabel = soundLabel;
         b.soundPath = soundPath;
+        b.bank = bank;
         targetDeviceMapping->bindings.add(b);
     }
 
@@ -56,7 +58,7 @@ void MappingEngine::assignKey(const DeviceId& deviceId, int virtualKeyCode,
         onMappingChanged();
 }
 
-void MappingEngine::removeBinding(const DeviceId& deviceId, int virtualKeyCode)
+void MappingEngine::removeBinding(const DeviceId& deviceId, int virtualKeyCode, int bank)
 {
     for (auto& dm : activeSet.deviceMappings)
     {
@@ -64,7 +66,8 @@ void MappingEngine::removeBinding(const DeviceId& deviceId, int virtualKeyCode)
         {
             for (int i = dm.bindings.size() - 1; i >= 0; --i)
             {
-                if (dm.bindings[i].virtualKeyCode == virtualKeyCode)
+                if (dm.bindings[i].virtualKeyCode == virtualKeyCode
+                    && (bank == -1 || dm.bindings[i].bank == bank))
                 {
                     dm.bindings.remove(i);
                     if (onMappingChanged != nullptr)
@@ -76,7 +79,7 @@ void MappingEngine::removeBinding(const DeviceId& deviceId, int virtualKeyCode)
     }
 }
 
-void MappingEngine::renameBinding(const DeviceId& deviceId, int virtualKeyCode, const juce::String& newLabel)
+void MappingEngine::renameBinding(const DeviceId& deviceId, int virtualKeyCode, const juce::String& newLabel, int bank)
 {
     for (auto& dm : activeSet.deviceMappings)
     {
@@ -84,7 +87,7 @@ void MappingEngine::renameBinding(const DeviceId& deviceId, int virtualKeyCode, 
         {
             for (auto& b : dm.bindings)
             {
-                if (b.virtualKeyCode == virtualKeyCode)
+                if (b.virtualKeyCode == virtualKeyCode && b.bank == bank)
                 {
                     b.soundLabel = newLabel;
                     if (onMappingChanged != nullptr)
@@ -96,8 +99,10 @@ void MappingEngine::renameBinding(const DeviceId& deviceId, int virtualKeyCode, 
     }
 }
 
-const KeyBinding* MappingEngine::findBinding(const DeviceId& deviceId, int virtualKeyCode) const
+const KeyBinding* MappingEngine::findBinding(const DeviceId& deviceId, int virtualKeyCode, int bank) const
 {
+    const KeyBinding* defaultFallback = nullptr;
+
     for (const auto& dm : activeSet.deviceMappings)
     {
         if (dm.deviceId == deviceId)
@@ -105,11 +110,17 @@ const KeyBinding* MappingEngine::findBinding(const DeviceId& deviceId, int virtu
             for (const auto& b : dm.bindings)
             {
                 if (b.virtualKeyCode == virtualKeyCode)
-                    return &b;
+                {
+                    if (b.bank == bank)
+                        return &b; // Exact bank match
+
+                    if (b.bank == 0 && defaultFallback == nullptr)
+                        defaultFallback = &b; // Fallback to base bank
+                }
             }
         }
     }
-    return nullptr;
+    return defaultFallback;
 }
 
 juce::File MappingEngine::getMappingConfigFile() const
@@ -154,6 +165,7 @@ void MappingEngine::loadActiveSetFromDisk()
                     kb.virtualKeyCode = static_cast<int>(bindItem.getProperty("vkey", 0));
                     kb.soundLabel = bindItem.getProperty("label", "").toString();
                     kb.soundPath = bindItem.getProperty("path", "").toString();
+                    kb.bank = static_cast<int>(bindItem.getProperty("bank", 0));
 
                     if (kb.virtualKeyCode > 0)
                         dm.bindings.add(kb);
@@ -179,11 +191,12 @@ void MappingEngine::saveActiveSetToDisk()
 
         juce::Array<juce::var> bindArray;
         for (const auto& b : dm.bindings)
-            {
+        {
             auto bindObj = std::make_unique<juce::DynamicObject>();
             bindObj->setProperty("vkey", b.virtualKeyCode);
             bindObj->setProperty("label", b.soundLabel);
             bindObj->setProperty("path", b.soundPath);
+            bindObj->setProperty("bank", b.bank);
             bindArray.add(juce::var(bindObj.release()));
         }
 

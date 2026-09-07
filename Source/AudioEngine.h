@@ -32,11 +32,17 @@ struct SamplerVoice
     bool isActive = false;
 };
 
-/** A discrete trigger event recorded in a looper lane. */
+/** A discrete trigger event recorded in a looper lane with micro-timing, gate duration, and per-hit parameter locks. */
 struct TriggerEvent
 {
     int sampleHandle = -1;
     juce::int64 offsetSamples = 0;
+    juce::int64 durationSamples = 0; // 0 = default one-shot
+    float gain = 1.0f;               // Velocity / dynamic accent (0.0 to 2.0)
+    float pitchSemitones = 0.0f;    // Per-hit transposition (-24 to +24)
+    float reverbSend = 0.0f;         // Per-hit reverb burst (0.0 to 1.0)
+    float delaySend = 0.0f;          // Per-hit delay throw (0.0 to 1.0)
+    float filterCutoff = 1.0f;       // Per-hit filter cutoff (0.0 to 1.0)
 };
 
 /** Multi-track looper lane synchronized directly to audio samples. */
@@ -61,6 +67,22 @@ public:
     /** Records a trigger event, applying BPM quantization if a quantizer is provided. */
     void recordTrigger(int sampleHandle, juce::int64 offsetInLoopSamples,
                        const BpmQuantizer* quantizer = nullptr);
+
+    /** Micro-timing: moves an event to a new offset, keeping events sorted. */
+    void moveEvent(int eventIndex, juce::int64 newOffsetSamples);
+
+    /** Sets the gate duration of a specific event. */
+    void setEventDuration(int eventIndex, juce::int64 durationSamples);
+
+    /** Updates per-hit parameter locks (gain, pitch, reverb, delay, filter). */
+    void setEventParams(int eventIndex, float gain, float pitchSemitones = 0.0f,
+                        float reverbSend = 0.0f, float delaySend = 0.0f, float filterCutoff = 1.0f);
+
+    /** Removes a specific event by index. */
+    void removeEvent(int eventIndex);
+
+    /** Duplicates an event, placing the copy at offset + duplicateOffsetSamples (default 1/16). */
+    void duplicateEvent(int eventIndex, juce::int64 duplicateOffsetSamples = 0);
 
     juce::int64 getLoopLengthSamples() const { return loopLengthSamples; }
 
